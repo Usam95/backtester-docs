@@ -1,4 +1,5 @@
-\chapter{Vectorized Backtesting}
+\chapter{Technical Indicator based Backtesting}
+\label{chap:technical_backtesting}
 
 
 Backtesting is the process of testing a trading strategy using historical data, allowing traders to evaluate and refine their
@@ -55,7 +56,7 @@ Commonly used in technical analysis, these indicators provide insight into the m
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[page=1, trim=30mm 135mm 0 25mm, width=1.1\textwidth, clip]{./uml/backtester_uml.pdf}
+\includegraphics[page=1, trim=30mm 135mm 0 25mm, width=1.1\textwidth, clip]{./pdf/backtester_uml.pdf}
 \caption{Technical indicator based backtesting architecture.}
 \label{fig:tech_indicator_arch}
 \end{figure}
@@ -105,125 +106,45 @@ Consider the snapshot below, extracted from a more intricate configuration, as a
 }
 \end{verbatim}
 
-
-
 Furthermore, individual backtesting results for each symbol and strategy can be visualized, as depicted in fig.~\ref{fig:backtest_results}.
 This figure showcases the performance results of the optimized strategy juxtaposed against the buy-and-hold strategy.
 As an illustrative example, the EMA strategy for LTCUSDT is spotlighted. All pertinent parameters are illustrated above the primary plot.
 Testing was executed on historical data spanning from 2021-01-01 to 2021-12-31.
-The secondary plot, detailing close prices, accentuates the drastic price fluctuations during this period.
- Impressively, the algorithm managed to surpass the buy-and-hold strategy, achieving an outperformance of 0.953 (which can be construed as a 95\% enhancement).
 
-\begin{table}[ht!]
-    \centering
-    \begin{tabular}{l}
-        \texttt{LTCUSDT | EMA : (plot\_all = True , freq = 125 , ema\_s\_val = 50 , ema\_l\_val = 200 )} \\
-        \texttt{Strategy Multiple = 2.065 , Buy/Hold Multiple = 1.09 ,} \\
-        \texttt{Net Out-/Under Perf = 0.953 , Num Trades = 14} \\
-    \end{tabular}
-\end{table}
-
-
-\begin{figure}
+\begin{figure} [H]
 \centering
-\includegraphics[page=1, trim=0mm 0mm 0 0mm, width=1\textwidth, clip]{./uml/backtesting_results.pdf}
+\includegraphics[page=1, trim=0mm 0mm 0 0mm, width=0.95\textwidth, clip]{./pdf/backtesting_results.pdf}
 \caption{Results of Backtesting of MACD Stragegy of XRPUSDT.}
 \label{fig:backtest_results}
 \end{figure}
 
+The secondary plot, detailing close prices, accentuates the drastic price fluctuations during this period.
+Impressively, the algorithm managed to surpass the buy-and-hold strategy, achieving an outperformance of 0.953 (which can be construed as a 95\% enhancement).
 Furthermore, individual backtesting results for each symbol and strategy can be visualized, as depicted in fig.~\ref{fig:backtest_results}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l}
+        \texttt{LTCUSDT | EMA : (freq = 125 , ema\_s\_val = 50 , ema\_l\_val = 200 )} \\
+        \texttt{Strategy Multiple = 2.065 , Buy/Hold Multiple = 1.09 ,} \\
+        \texttt{Net Out-/Under Perf = 0.953 , Num Trades = 14} \\
+    \end{tabular}
+\end{table}
 This figure showcases the performance results of the optimized strategy juxtaposed against the buy-and-hold strategy.
 As an illustrative example, the EMA strategy for LTCUSDT is spotlighted. All pertinent parameters are illustrated above the primary plot.
 Testing was executed on historical data spanning from 2021-01-01 to 2021-12-31.
 The secondary plot, detailing close prices, accentuates the drastic price fluctuations during this period.
- Impressively, the algorithm managed to surpass the buy-and-hold strategy, achieving an outperformance of 0.953 (which can be construed as a 95\% enhancement).
+Impressively, the algorithm managed to surpass the buy-and-hold strategy, achieving an outperformance of 0.953 (which can be construed as a 95\% enhancement).
 % trim={<left> <lower> <right> <upper>}
 %\vspace{-2cm}
 
-\begin{figure}[h]
-\centering
-\includegraphics[page=1, trim=0 0 0 0, width=\textwidth, clip]{./uml/dataset_histogram.pdf}
-\caption{Histogram of engineered features from the BTCUSDT historical data.}
-\label{fig:dataset_histogram}
-\end{figure}
+
+%Parameters:
+%{'algorithm': 'SAMME', 'base_estimator': None, 'learning_rate': 0.5, 'n_estimators': 100, 'random_state': None}
 
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=\linewidth]{./uml/signal_distribution.pdf}
-    \caption{The distribution of target values in both the training (shown in green) and validation (shown in blue) datasets. Each horizontal bar represents a unique target value, with the length of the bar indicating the count of occurrences in the respective dataset. Absolute counts are annotated directly on the bars, facilitating a clearer understanding of the distribution. This visualization aids in discerning the balance or imbalance of target values across the two datasets.}
-\label{fig:signal_distribution}
-\end{figure}
 
 
-\begin{figure}[htbp!]
-\centering
-\includegraphics[width=\paperwidth]{./uml/correlation_matrix.pdf}
-
-\caption{Correlation Coefficient between features variables.}
-\label{fig:corr_coef}
-\end{figure}
 
 
-\section{Pipeline}
 
-\subsection{Data Ingestion}
-The initial step involves ingesting data required for backtesting. This data can either be procured using the \texttt{data\_retrieve.py} module (refer to Chapter~\ref{chap:dataRetrieve}) or loaded from the \texttt{historical\_data} folder, found within the respective symbol's subfolder. If the data hasn't been previously downloaded, it can be found here. It's recommended to retrieve data with a one-minute time bar length, as this can be efficiently downsampled later for larger intervals such as an hour or a day.
-
-\subsection{Data Preprocessing}
-In this phase, the ingested data is downsampled based on the bar length stipulated in the configuration. Furthermore, a validation check is run to ensure data integrity.
-
-\subsection{Feature Engineering}
-This step mainly focuses on constructing features derived from various technical indicators and statistical methodologies. These features could be momentum-based, volume-based, among others. Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
-\begin{itemize}
-    \item \textbf{Simple}: Predicts if the next day's price will go up or down based on today's closing price.
-    \item \textbf{MA\_Relative}: Checks if today's closing price is above its short-term average and rising.
-    \item \textbf{Momentum}: Examines if the stock's momentum is positive and increasing.
-    \item \textbf{ROC}: Looks at if the rate of change (ROC) is positive and on the rise.
-    \item \textbf{Consecutive\_Increases}: Predicts if returns will rise for the third consecutive time after a decline.
-\end{itemize}
-
-
-\begin{figure}[h]
-\centering
-\includegraphics[page=1, trim=50mm 220mm 20mm 25mm, width=1.3\textwidth, clip]{./uml/ml_pipeline.pdf}
-\caption{Technical indicator based backtesting architecture.}
-\label{fig:ml_pipeline}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=1.0\textwidth]{./uml/perf\_metrics.pdf}
-\caption{Visualization of the Classification Report.}
-\label{fig:conf_matrix}
-\end{figure}
-
- %Confusion matrix (left) presenting actual versus predicted values, alongside key performance metrics (right) indicating the model's accuracy, precision, recall, and F1 score.}
-\subsection{Feature Transformation}
-
-Once features have been engineered, it's essential to transform them to ensure they are adjusted to meet the requirements and sensitivities of machine learning models. Different models have varied preferences when it comes to the scale and distribution of input data. This transformation process uses several techniques such as Standardization and MinMaxScaling.
-
-It's vital to apply the same transformations, like standardization parameters, to both the training and testing datasets or any new incoming data. This ensures consistent and accurate model predictions.
-
-The entire transformation workflow, from data loading, preprocessing, to feature-related operations, is orchestrated by the \texttt{DataManager} and \texttt{FeatureEngineer} classes (fig. \ref{fig:dataManagerFeatureEngineer}).
-After this step the \texttt{ml\_model\_evaluator} module can be used for data analysis. It provides tools for both data and model checks. The prepared data can be visualized in various ways, including target distributions, feature covariance matrices, and feature histograms.
-
-
-\subsection{Model Training and Optimization}
-Model specifics, including the model type (e.g., LogisticRegressor) and its hyperparameter ranges, are detailed in the JSON configuration file. The optimization uses Grid Search combined with Cross-Validation, the details of which (e.g., number of folds) can also be adjusted in the configuration file (see fig. ~\ref{fig:modelConfig}).
-
-\subsection{Model Evaluation}
-After training and optimization, the model's performance is assessed using various evaluation metrics, including graphical representations like the confusion matrix. Moreover, additional plots are available to facilitate data analysis, such as the covariance matrix.
-
-\subsection{Backtesting}
-Backtesting is done in a separate step because it has its unique methods and processes. The trained and adjusted model is tested to see the returns, showing how it might have worked in real-life situations.
-\subsection{Backtest Analysis}
-The last step in the evaluation of backtesting results. Performance metrics in this analysis include strategy returns, comparison to a benchmark like the buy-and-hold strategy, and the usage of other advanced metrics such as Calmar and Sortino ratios.
-
-\begin{figure}
-\centering
-\includegraphics[width=1.0\textwidth]{./uml/feature\_importance.pdf}
-\caption{Feature Significance in Model Prediction}
-\label{fig:feature_importance}
-\end{figure}
