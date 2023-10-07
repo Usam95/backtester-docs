@@ -8,6 +8,7 @@ This structured process is visualized as a pipeline, detailed in fig. \ref{fig:m
 %trim=left bottom right top,
 \section{Pipeline}
 
+
 \begin{figure}[H]
 \centering
 \includegraphics[trim=25mm 220mm 55mm 30mm, width=1.2\textwidth, clip]{./pdf/ml_pipeline.pdf}
@@ -20,10 +21,50 @@ leading to informed trading decisions. The process involves backtesting using th
 The pipeline steps can also be executed independently.
 For instance, starting with data ingestion and preprocessing can be followed by feature engineering and data visualization to gain a deeper understanding of the dataset. The steps of the pipeline in  fig. \ref{fig:ml_pipeline}. are detailed in the subsequent subsections.
 
+\subsection{Configuration}
+The following JSON configuration in lst. \ref{lst:mlpipeline} is used to set up the machine learning pipeline.
+The \texttt{dataset\_conf} element specifies details such as the cryptocurrency symbol (BTCUSDT in this case), the frequency of the time series data, and the start and end dates.
+Additionally, it offers an option to set the date for splitting the dataset into training and test sets.
+The configuration also includes options to set the desired model and the associated parameter space, facilitating fine-tuning via grid search.
+Also the \texttt{target\_conf} element allows for the selection of the target for the classification model. There are several target variants to choose from, that are describe later.
+
+
+
+
+\begin{lstlisting}[style=jsonstyle, caption={Machine Learning Pipeline Configuration}, label=lst:mlpipeline][h]
+{
+  "tc": 0.000750,
+  "dataset_conf": {
+     "symbol": "BTCUSDT",
+     "freq": "1d",
+     "start_date": "2018-01-01 00:00:00",
+     "end_date": "2023-08-30 23:59:00",
+     "split_date": "2022-12-31 23:59:00",
+     "mode": "full",
+     "target_conf": {
+       "target": "Exceed_Avg_Returns"
+    }
+  },
+  "model_name": "RandomForestClassifier",
+  "model_type": "classification",
+  "models_config": [
+     {
+       "model": "AdaBoostClassifier",
+       "params": {
+          "n_estimators": [10, 30, 100],
+          "learning_rate": [0.01, 0.1, 1.0],
+          "algorithm": ["SAMME", "SAMME.R"]
+       }
+     }
+  ]
+}
+\end{lstlisting}
+
+
 
 \subsection{Data Ingestion and Preprocessing}
-The first step is to ingest the data needed for backtesting. This data can be obtained using the \texttt{data_retrieve.py} module,
-as discussed in the previous chapter, or it can be loaded from the \texttt{historical_data} folder located within the respective symbol's subfolder
+The first step is to ingest the data needed for backtesting. This data can be obtained using the \texttt{dat\_retrieve.py} module,
+as discussed in the previous chapter, or it can be loaded from the \texttt{historical\_data} folder located within the respective symbol's subfolder
 If the data hasn't been previously downloaded, it can be found here. It's recommended to retrieve data with a one-minute time bar length,
 as this can be efficiently downsampled later for larger intervals such as an hour or a day.
 This is done in the data preprocessing phase, the ingested data is downsampled based on the bar length stipulated in the configuration. Furthermore, a validation check is run to ensure data integrity.
@@ -38,14 +79,26 @@ This is done in the data preprocessing phase, the ingested data is downsampled b
 \end{figure}
 
 
-
 %\vspace{20mm} % Put space between figure and subsection title
 %\vspace{10mm} % Adjust the value to your liking
 \FloatBarrier % This ensures that the figure is placed before continuing with the subsequent content
 \subsection{Feature Engineering}
-Different trend and momentum indicators are created from the data and are added as features to enhance the performance of the prediction model.
+Feature engineering is a critical step in improving the model's predictive capability.
+The goal is to identify features that could potentially influence the model's performance.
+Technical indicators are utilized to create features that help models predict upcoming price movements based on historical market data.
+The technical indicators used in the \texttt{ml\_feature\_engineer} module can be broadly categorized into momentum-based, trend-based, and volume-based.
 
-This step mainly focuses on constructing features derived from various technical indicators and statistical methodologies. These features could be momentum-based, volume-based, among others. Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
+
+\begin{itemize}
+    \item \textbf{Momentum-based Indicators:} These are primarily concerned with the speed of price movements. Features like Rate of Change (ROC), Momentum, variations of the Stochastic Oscillator, and the Relative Strength Index (RSI) fall into this category.
+
+    \item \textbf{Trend-based Indicators:} Aimed at identifying the movement direction over time, these include indicators such as the Moving Average (MA) and the Exponential Moving Average (EMA).
+
+    \item \textbf{Volume-based Indicators:} Volume, in trading, refers to the number of shares or contracts traded in a security or market. The feature set for this category includes the On-Balance Volume (OBV).
+\end{itemize}
+
+
+Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
 \begin{itemize}
     \item \textbf{Simple}: Predicts if the next day's price will go up or down based on today's closing price.
     \item \textbf{MA\_Relative}: Checks if today's closing price is above its short-term average and rising.
