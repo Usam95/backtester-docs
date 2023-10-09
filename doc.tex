@@ -1,4 +1,40 @@
 \documentclass[12pt, a4paper]{report} % 'report' or 'book' is suitable for project documentation.
+
+\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
+
+% Redefining chapter format
+\makeatletter
+\def\@makechapterhead#1{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \huge\bfseries \@chapapp\space \thechapter
+      \par\nobreak
+      \vskip 20\p@
+    \fi
+    \interlinepenalty\@M
+    \LARGE\bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+
+% Redefining section format
+\makeatletter
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
+                                   {2.3ex \@plus.2ex}%
+                                   {\large\bfseries}}
+\makeatother
+
+\makeatletter
+\renewcommand\subsection{\@startsection {subsection}{2}{\z@}%
+                                   {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                   {1.5ex \@plus .2ex}%
+                                   {\normalsize\bfseries}}
+\makeatother
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Package Imports
 %\usepackage[utf8]{inputenc} % commented out as per your instruction
@@ -11,11 +47,84 @@
 \usepackage{pdfpages}
 \usepackage{longtable}
 \usepackage{lscape}
-\usepackage{subfig}
+%\usepackage{subfig}
 \usepackage{makecell}
 \usepackage{colortbl}
 \usepackage{titlesec}
 \usepackage{geometry}
+\usepackage{subcaption}
+\usepackage{adjustbox}
+\usepackage{float}
+\usepackage{placeins}
+% to show directory trees
+\usepackage{dirtree}
+%\usepackage{forest}
+
+\usepackage{pdfpages}
+
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
+
+\usepackage{caption}
+
+\captionsetup[lstlisting]{belowskip=10pt} % Adjust 12pt to your liking
+\captionsetup[lstlisting]{aboveskip=10pt} % Adjust 12pt to your liking
+\captionsetup[figure]{aboveskip=10pt} % Adjust 12pt to your liking
+
+
+\lstdefinestyle{jsonstyle}{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    numbersep=8pt,
+    breaklines=true,
+    frame=tb,
+    backgroundcolor=\color[RGB]{245,245,245},
+    literate=
+     *{0}{{{\color[RGB]{0,128,255}0}}}{1}
+      {1}{{{\color[RGB]{0,128,255}1}}}{1}
+      {2}{{{\color[RGB]{0,128,255}2}}}{1}
+      {3}{{{\color[RGB]{0,128,255}3}}}{1}
+      {4}{{{\color[RGB]{0,128,255}4}}}{1}
+      {5}{{{\color[RGB]{0,128,255}5}}}{1}
+      {6}{{{\color[RGB]{0,128,255}6}}}{1}
+      {7}{{{\color[RGB]{0,128,255}7}}}{1}
+      {8}{{{\color[RGB]{0,128,255}8}}}{1}
+      {9}{{{\color[RGB]{0,128,255}9}}}{1}
+      {:}{{{\color[RGB]{255,64,64}{:}}}}{1}
+      {,}{{{\color[RGB]{255,64,64}{,}}}}{1}
+      {\{}{{{\color[RGB]{128,0,255}{\{}}}}{1}
+      {\}}{{{\color[RGB]{128,0,255}{\}}}}}{1}
+      {[}{{{\color[RGB]{128,0,255}{[}}}}{1} % Corrected here
+      {]}{{{\color[RGB]{128,0,255}{]}}}}{1} % and here
+}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{white},
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{red},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+% usage example: \titleformat*{\section}{\large} [\normalsize, \small]
+
+
+%\newcommand{\boldentry}[1]{\textbf{#1}}
 
 % ref packages
 %\usepackage{nameref} % commented out as per your instruction
@@ -54,7 +163,7 @@
     % Include the logo at the top of the page
 	\vspace*{-2cm} % Move the logo a bit higher
     \includegraphics[scale=1, width=\textwidth, keepaspectratio]{./imgs/logo8.png}
-	\vspace*{1cm}
+	\vspace*{2.5cm}
 
     % Title with adjusted breaking
     {\Huge \bfseries Backtesting and Deploying \\
@@ -63,7 +172,13 @@
 	
     % Author's name
     {\Large Usam Sersultanov\par}
-    \vspace{5cm}
+    \vspace{9.5cm}
+
+    % Introduce and provide the GitHub link here:
+    {\normalsize \textbf{This documentation describes the following project:}} \\
+    \vspace{0.2cm}
+    \href{https://github.com/Usam95/backtester.git}{https://github.com/Usam95/backtester.git}
+
 
     % Review History Table with adjustments
     %\vspace*{\stretch{1.5}} % Adjusts the space
@@ -78,6 +193,7 @@
     %1 & Entwurf & 04.08.2021 & Usam \\
     %\hline
     %\end{longtable}
+
 \end{titlepage}
 
 \tableofcontents
@@ -88,12 +204,12 @@
 
 \input{setup_installation.tex}  % Setup & Installation
 
-\input{directory_structure.tex}  % Directory Structure
+%\input{directory_structure.tex}  % Directory Structure
 
-\input{backtesting_overview.tex}  % Overview of the main backtesting directory
+\input{backtesting.tex}  % Overview of the main backtesting directory
 \input{indicators.tex}  % Indicators
 \input{ml_backtesting.tex}  % ML Backtesting
-\input{vectorized_backtesting.tex}  % Vectorized Backtesting
+%\input{vectorized_backtesting.tex}  % Vectorized Backtesting
 
 \input{deployment.tex}  % Deployment
 
@@ -102,6 +218,7 @@
 \input{data_retriever.tex}  % Historical Data
 
 \input{vectorized_backtesting.tex}  % Documentation (docs)
+\input{conclusion.tex}
 
 %\input{miscellaneous.tex}  % Miscellaneous
 

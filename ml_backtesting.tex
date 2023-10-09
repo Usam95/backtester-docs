@@ -31,7 +31,7 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
 
 \begin{lstlisting}[style=jsonstyle, caption={Machine Learning Pipeline Configuration},  captionpos=b, label=lst:pipeline_conf][h]
 {
-  "tc": 0.000750,
+  "tc": 0.001,
   "dataset_conf": {
      "symbol": "BTCUSDT",
      "freq": "1d",
@@ -61,22 +61,12 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
 
 
 \subsection{Data Ingestion and Preprocessing}
-The first step involves ingesting the data required for backtesting. This data can be sourced from Binance using the \texttt{data_retrieve.py} module, as detailed in the previous chapter.
-The data is saved in the \texttt{historical_data} folder, which is located within the corresponding symbol's subfolder, created during the data download process.
+The first step involves ingesting the data required for backtesting. This data can be sourced from Binance using the \texttt{data\_retrieve.py} module, as detailed in the previous chapter.
+The data is saved in the \texttt{historical\_data} folder, which is located within the corresponding symbol's subfolder, created during the data download process.
 Once the data has been retrieved, it can be ingested into the pipeline. It's recommended to retrieve data with a one-minute time bar length,
 as this can be efficiently downsampled later for larger intervals such as an hour or a day.
 This is done during the data preprocessing phase. The ingested data is downsampled based on the bar length specified in the configuration (refer to \lstinline[label=lst:pipeline_conf]{lst:pipeline_conf}, line 5), where the \texttt{freq} parameter is set to \texttt{1d}.
 Furthermore, a validation check is run to ensure data integrity.
-
-\begin{figure}[h]
-\centering
-\begin{adjustbox}{max width=1\textwidth,center}
-    \includegraphics[scale=1]{./pdf/dataset_histogram.pdf}
-\end{adjustbox}
-\caption{Histogram of engineered features from the BTCUSDT historical data.}
-\label{fig:dataset_histogram}
-\end{figure}
-
 
 %\vspace{20mm} % Put space between figure and subsection title
 %\vspace{10mm} % Adjust the value to your liking
@@ -96,17 +86,7 @@ The technical indicators used in the \texttt{ml\_feature\_engineer} module can b
     \item \textbf{Volume-based Indicators:} Volume, in trading, refers to the number of shares or contracts traded in a security or market. The feature set for this category includes the On-Balance Volume (OBV).
 \end{itemize}
 
-
-Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
-\begin{itemize}
-    \item \textbf{Simple}: Predicts if the next day's price will go up or down based on today's closing price.
-    \item \textbf{MA\_Relative}: Checks if today's closing price is above its short-term average and rising.
-    \item \textbf{Momentum}: Examines if the stock's momentum is positive and increasing.
-    \item \textbf{ROC}: Looks at if the rate of change (ROC) is positive and on the rise.
-    \item \textbf{Consecutive\_Increases}: Predicts if returns will rise for the third consecutive time after a decline.
-\end{itemize}
-
-\begin{lstlisting}[language=Python, caption={Function to add features to the dataset},  captionpos=b, label=lst:add_features_function]
+\begin{lstlisting}[style=pythonstyle, language=Python, caption={Function to add features to the dataset},  captionpos=b, label=lst:add_features_function]
 def add_features(self):
     """Add various technical indicators to the dataset."""
     for n in self.periods:
@@ -127,37 +107,61 @@ def add_features(self):
     self._add_rolling_cum_range()
     self._add_day_of_week()
     self._calculate_range()
+
 \end{lstlisting}
 
 
+Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
+\begin{itemize}
+    \item \textbf{Simple}: Predicts if the next day's price will go up or down based on today's closing price.
+    \item \textbf{MA\_Relative}: Checks if today's closing price is above its short-term average and rising.
+    \item \textbf{Momentum}: Examines if the stock's momentum is positive and increasing.
+    \item \textbf{ROC}: Looks at if the rate of change (ROC) is positive and on the rise.
+    \item \textbf{Consecutive\_Increases}: Predicts if returns will rise for the third consecutive time after a decline.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\begin{adjustbox}{max width=1\textwidth,center}
+    \includegraphics[scale=1]{./pdf/dataset_histogram.pdf}
+\end{adjustbox}
+\caption{Histogram of engineered features from the BTCUSDT historical data.}
+\label{fig:dataset_histogram}
+\end{figure}
+
+ %Confusion matrix (left) presenting actual versus predicted values, alongside key performance metrics (right) indicating the model's accuracy, precision, recall, and F1 score.}
+\subsection{Feature Transformation}
+
+After engineering the features, it's essential to transform them to meet the specific requirements of machine learning models. Many algorithms have assumptions about the data's scale and distribution.
+Hence, features undergo transformations using techniques like \texttt{Standardization} and {MinMax Scaling}.
+
+It's importan to apply the same transformations with according parameters, to both the training and testing datasets or any new incoming data. This ensures consistent and accurate model predictions.
+
+The entire transformation workflow, from data loading, preprocessing, to feature-related operations, is orchestrated by the \texttt{DataManager} and \texttt{FeatureEngineer} classes (fig. \ref{fig:dataManagerFeatureEngineer}).
+
+
+
+\subsection{Data Visualization}
+For data analysis the \texttt{ml\_model\_evaluator} module was implemented with appropriate methods. It provides tools for both data and model checks.
+The prepared data can be visualized in various ways, including target distributions, feature covariance matrices, and feature histograms.
+
+The \textbf{distribution of the predicted variable} across both training and validation datasets is showed in fig. \ref{fig:signal_distribution}.
+Notably, the distribution between the two classes (1's and 0's) is nearly balanced in both datasets. Such a balanced distribution is crucial for training machine learning models effectively, ensuring that they aren't biased towards one class.
 
 \begin{figure}[h]
 \centering
 \begin{adjustbox}{max width=1\textwidth,center}
     \includegraphics[scale=1]{./pdf/report/sig_distr.pdf}
 \end{adjustbox}
-    \caption{The distribution of target values in both the training (shown in green) and validation (shown in blue) datasets. Each horizontal bar represents a unique target value, with the length of the bar indicating the count of occurrences in the respective dataset. Absolute counts are annotated directly on the bars, facilitating a clearer understanding of the distribution. This visualization aids in discerning the balance or imbalance of target values across the two datasets.}
+    \caption{The distribution of target values in both the training testing datasets.}
 \label{fig:signal_distribution}
 \end{figure}
 
- %Confusion matrix (left) presenting actual versus predicted values, alongside key performance metrics (right) indicating the model's accuracy, precision, recall, and F1 score.}
-\subsection{Feature Transformation}
-
-Once features have been engineered, it's essential to transform them to ensure they are adjusted to meet the requirements and sensitivities of machine learning models. Different models have varied preferences when it comes to the scale and distribution of input data. This transformation process uses several techniques such as Standardization and MinMaxScaling.
-
-It's vital to apply the same transformations, like standardization parameters, to both the training and testing datasets or any new incoming data. This ensures consistent and accurate model predictions.
-
-The entire transformation workflow, from data loading, preprocessing, to feature-related operations, is orchestrated by the \texttt{DataManager} and \texttt{FeatureEngineer} classes (fig. \ref{fig:dataManagerFeatureEngineer}).
-After this step the \texttt{ml\_model\_evaluator} module can be used for data analysis. It provides tools for both data and model checks. The prepared data can be visualized in various ways, including target distributions, feature covariance matrices, and feature histograms.
-
-\subsection{Data Visualization}
-Let us look at the distribution of the predicted variable. The predicted variable is 1 more than 52\% of the time, meaning there are more buy
-signals than sell signals. The predicted variable is relatively balanced, especially as
-compared to the fraud dataset we saw in the first case study.
-
+The fig. \ref{fig:corr_coef} illustrates the \textbf{correlation coefficients} between various feature variables in the dataset.
+Each cell in the matrix represents the degree of correlation between two features: a value close to 1, represented by dark green, signifies a strong positive correlation, while a value close to -1, shown in white, indicates a strong negative correlation.
 
 %trim=left bottom right top,
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 \begin{adjustbox}{max width=1.2\textwidth,center}
     \includegraphics[scale=1.2, trim={30mm 70mm 50mm 110mm}, clip]{./pdf/correlation_matrix.pdf}
@@ -166,9 +170,44 @@ compared to the fraud dataset we saw in the first case study.
 \label{fig:corr_coef}
 \end{figure}
 
+The fig. \ref{fig:dataset_histogram} presents a \textbf{histogram} showcasing the distribution of engineered features derived from the BTCUSDT historical data. Each bar in the histogram represents the frequency of occurrences for a particular value or range of values. This visualization provides insights into the distribution patterns and potential skewness of the different features in the dataset.
+
+
 
 \subsection{Model Training and Optimization}
-Model specifics, including the model type (e.g., LogisticRegressor) and its hyperparameter ranges, are detailed in the JSON configuration file. The optimization uses Grid Search combined with Cross-Validation, the details of which (e.g., number of folds) can also be adjusted in the configuration file (see fig. ~\ref{fig:modelConfig}).
+The logic for model training and backtesting is encapsulated within the \texttt{ml\_backtester.py} module,
+while the \texttt{ml\_optimizer.py} module is dedicated to optimization purposes, as depicted in Figure \ref{fig:<your_figure_label_here>}.
+The \texttt{\_optimize\_model} function in the \texttt{ml\_backtester.py} module is responsible for the model optimization process.
+It utilizes the instance of the MlOptimizer class to perform searching for the best parameters of the model using techniques such as Grid Search with Cross-Validation.
+In a grid search, a grid of all possible hyperparameter combinations is created, and the model is trained using each one of them. The best model is then used in the \texttt{\_generate\_predictions}
+function to predict the trends in price movements on unseen data. Once optimized, the trained model specific to a cryptocurrency can be saved for subsequent use and reloaded as needed.
+Model specifics, such as the model type (for instance, AdaBoostClassifier) and its hyperparameter ranges, are defined in the JSON configuration file (see lst. \ref{lst:pipeline_conf}).
+
+\begin{lstlisting}[style=pythonstyle, language=Python, caption={Function of MlBacktester class for model optimization and predictions.},  captionpos=b, label=lst:add_features_function]
+def _optimize_model(self):
+   # Instantiate the GridSearchOptimizer
+   optimizer = GridSearchOptimizer(self.data_manager.X_train,
+                                self.data_manager.y_train,
+                                self.config.dataset_conf.symbol,
+                                task_type=self.config.model_type,
+                                num_folds=self.config.num_folds,
+                                scoring=self.config.scoring)
+
+   # Optimize the model using configured parameters grid
+   best_model = optimizer.grid_search(self.config.model_name,
+                                  self.model,
+                                  self.get_model_params_grid())
+
+   # Update the model of the strategy to the optimized model
+   self.model = best_model
+
+def _generate_predictions(self):
+   '''Generate predictions using the model.'''
+   predictions = self.model.predict(self.data.X_train)
+   self.data['predictions'] = predictions
+   self.data['predictions'].ffill().fillna(0, inplace=True)
+
+\end{lstlisting}
 
 \subsection{Model Evaluation using Classification Metrics}
 After training the trading model's performance can be evaluated using several metrics. These metrics provide insights into the model's predictions and highlight potential areas for improvement.
@@ -177,7 +216,7 @@ For each phase (training and testing):
 
 The left diagram presents the confusion matrix, which shows the number of correct and incorrect predictions made by the model.
 The right diagram visualizes key performance metrics, specifically: accuracy, precision, recall, and F1 score. Each metric is also further described in  more detail below.
-\begin{figure}[H]
+\begin{figure}[h]
     \centering
 
     \begin{subfigure}[b]{\textwidth}
@@ -221,6 +260,52 @@ The right diagram visualizes key performance metrics, specifically: accuracy, pr
 \end{itemize}
 
 
+\subsection{Backtesting and Analysis}
+After the model is trained and fine-tuned, it's crucial to check how good it is by testing its effectiveness not just on the basis of typical classification metrics but also on how well it performs in a simulated trading environment.
+
+The code listing \ref{lst:add_features_function} showcases the \texttt{run\_strategy} function, a part of the \texttt{MlBacktester} class. This function is designed to run the backtesting process:
+
+\begin{figure}[h]
+\centering
+\begin{adjustbox}{max width=1.3\textwidth,center}
+\includegraphics[scale=1.3]{./pdf/report/backtest_res.pdf}
+\end{adjustbox}
+\caption{Feature Significance in Model Prediction}
+\label{fig:backtest_res}
+\end{figure}
+
+After generating predictions, the strategy values are calculated. These strategy values reflect the positions the model would take based on its predictions.
+Further, trades are determined and adjustments are made to account for transaction costs, which are often overlooked but can significantly impact net returns in real-world scenarios.
+Finally, cumulative metrics are computed, followed by a performance evaluation to assess the overall success of the trading strategy.
+By summing the strategy returns, the model's hypothetical profitability over the backtesting period is determined.
+
+\begin{lstlisting}[style=pythonstyle, language=Python, caption={\vspace*{1cm}Function of MlBacktester class for backtesting execution.},  captionpos=b, label=lst:add_features_function]
+def run_strategy(self):
+    '''Backtests the trading strategy.'''
+    self._generate_predictions()
+    self._calculate_strategy_values()
+    self._calculate_trades()
+    self._adjust_for_transaction_costs()
+    self._calculate_cumulative_metrics()
+    self.perf_evaluator._calculate_perf(self.data)
+
+\end{lstlisting}
+
+A common benchmark to assess the strategy's success is the "buy and hold" method.
+In this approach, the asset is bought and kept throughout the entire period without incurring extra costs or decisions based on price changes.
+Comparing the total strategy returns to the "buy and hold" method's returns provides an understanding of the ML-based strategy's added benefit.
+If the model outperformes this benchmark, it can be considered as useful for trading.
+
+The fig. \ref{fig:backtest_res} illustrates the comparison between the returns of the "buy and hold" strategy and those of the configured \texttt{AdaBoostClassifier} model's strategy.
+The model's strategy achieved a return multiple of 4.376. This surpasses the 3.633 return from the "buy and hold" method, resulting in a net outperformance of 0.743, or 74.3\%.
+This outperformance is observed at the end of the backtesting period, which can also be configured in the JSON configuration shown in lst. \ref{lst:pipeline_conf}.
+Moreover, the analysis took into account Binance's trading fees of 0.1\% for spot trading, ensuring a more realistic representation of potential real-world returns.
+The backtesting results show the potential of the model for real-world trading scenarios.
+
+
+
+
+
 \begin{figure}
 \centering
 \begin{adjustbox}{max width=1.2\textwidth,center}
@@ -231,37 +316,7 @@ The right diagram visualizes key performance metrics, specifically: accuracy, pr
 \end{figure}
 
 
-\subsection{Backtesting}
-
-In this additional step, we perform a backtest on the model
-we’ve developed. We create a column for strategy returns by multiplying the daily
-returns by the position that was held at the close of business the previous day and
-compare it against the actual returns.
-
-Backtesting is done in a separate step because it has its unique methods and processes. The trained and adjusted model is tested to see the returns, showing how it might have worked in real-life situations.
-\subsection{Backtest Analysis}
-The last step in the evaluation of backtesting results. Performance metrics in this analysis include strategy returns, comparison to a benchmark like the buy-and-hold strategy, and the usage of other advanced metrics such as Calmar and Sortino ratios.
-
-Looking at the backtesting results, we do not deviate significantly from the actual
-market return. Indeed, the achieved momentum trading strategy made us better at
-predicting the price direction to buy or sell in order to make profits. However, as our
-accuracy is not 100% (but more than 96%), we made relatively few losses compared
-to the actual returns.
-
-
-\begin{figure}
-\centering
-\begin{adjustbox}{max width=1.3\textwidth,center}
-\includegraphics[scale=1.3]{./pdf/report/backtest_res.pdf}
-\end{adjustbox}
-\caption{Feature Significance in Model Prediction}
-\label{fig:backtest_res}
-\end{figure}
-
-
-
-
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics[width=0.9\textwidth]{./pdf/report/explained\_variance.pdf}
 \caption{Explained Variance of Features after Performing Feature Reduction.}
