@@ -5,7 +5,7 @@ Using ML to predict trading outcomes requires a systematic approach.
 This structured process is visualized as a pipeline, detailed in fig. \ref{fig:ml_pipeline}.
 
 %trim=left bottom right top,
-\section{ML Trading Pipeline}
+\section{ML Trading Pipeline} \label{sec:ml_pipeline}
 
 
 \begin{figure}[H]
@@ -28,7 +28,7 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
 
 
 
-
+\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=jsonstyle, caption={Machine Learning Pipeline Configuration},  captionpos=b, label=lst:pipeline_conf][h]
 {
   "tc": 0.001,
@@ -57,6 +57,7 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
   ]
 }
 \end{lstlisting}
+\end{minipage}
 
 
 
@@ -86,6 +87,8 @@ The technical indicators used in the \texttt{ml\_feature\_engineer} module can b
     \item \textbf{Volume-based Indicators:} Volume, in trading, refers to the number of shares or contracts traded in a security or market. The feature set for this category includes the On-Balance Volume (OBV).
 \end{itemize}
 
+
+\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=pythonstyle, language=Python, caption={Function to add features to the dataset},  captionpos=b, label=lst:add_features_function]
 def add_features(self):
     """Add various technical indicators to the dataset."""
@@ -109,6 +112,7 @@ def add_features(self):
     self._calculate_range()
 
 \end{lstlisting}
+\end{minipage}
 
 
 Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
@@ -183,6 +187,8 @@ In a grid search, a grid of all possible hyperparameter combinations is created,
 function to predict the trends in price movements on unseen data. Once optimized, the trained model specific to a cryptocurrency can be saved for subsequent use and reloaded as needed.
 Model specifics, such as the model type (for instance, AdaBoostClassifier) and its hyperparameter ranges, are defined in the JSON configuration file (see lst. \ref{lst:pipeline_conf}).
 
+
+\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=pythonstyle, language=Python, caption={Function of MlBacktester class for model optimization and predictions.},  captionpos=b, label=lst:add_features_function]
 def _optimize_model(self):
    # Instantiate the GridSearchOptimizer
@@ -208,6 +214,8 @@ def _generate_predictions(self):
    self.data['predictions'].ffill().fillna(0, inplace=True)
 
 \end{lstlisting}
+\end{minipage}
+
 
 \subsection{Model Evaluation using Classification Metrics}
 After training the trading model's performance can be evaluated using several metrics. These metrics provide insights into the model's predictions and highlight potential areas for improvement.
@@ -279,6 +287,7 @@ Further, trades are determined and adjustments are made to account for transacti
 Finally, cumulative metrics are computed, followed by a performance evaluation to assess the overall success of the trading strategy.
 By summing the strategy returns, the model's hypothetical profitability over the backtesting period is determined.
 
+\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=pythonstyle, language=Python, caption={\vspace*{1cm}Function of MlBacktester class for backtesting execution.},  captionpos=b, label=lst:add_features_function]
 def run_strategy(self):
     '''Backtests the trading strategy.'''
@@ -290,13 +299,12 @@ def run_strategy(self):
     self.perf_evaluator._calculate_perf(self.data)
 
 \end{lstlisting}
+\end{minipage}
 
 A common benchmark to assess the strategy's success is the "buy and hold" method.
 In this approach, the asset is bought and kept throughout the entire period without incurring extra costs or decisions based on price changes.
 Comparing the total strategy returns to the "buy and hold" method's returns provides an understanding of the ML-based strategy's added benefit.
-If the model outperformes this benchmark, it can be considered as useful for trading.
-
-The fig. \ref{fig:backtest_res} illustrates the comparison between the returns of the "buy and hold" strategy and those of the configured \texttt{AdaBoostClassifier} model's strategy.
+If the model outperformes this benchmark, it can be considered as useful for trading. The fig. \ref{fig:backtest_res} illustrates the comparison between the returns of the "buy and hold" strategy and those of the configured \texttt{AdaBoostClassifier} model's strategy.
 The model's strategy achieved a return multiple of 4.376. This surpasses the 3.633 return from the "buy and hold" method, resulting in a net outperformance of 0.743, or 74.3\%.
 This outperformance is observed at the end of the backtesting period, which can also be configured in the JSON configuration shown in lst. \ref{lst:pipeline_conf}.
 Moreover, the analysis took into account Binance's trading fees of 0.1\% for spot trading, ensuring a more realistic representation of potential real-world returns.
@@ -304,9 +312,21 @@ The backtesting results show the potential of the model for real-world trading s
 
 
 %trim=left bottom right top,
-\subsection{ML Pipeline Architecture}
+\section{ML Pipeline Architecture}
 
-\begin{figure}[]
+The architecture of the pipeline is visually depicted in a UML diagram, as shown in fig. ~\ref{fig:ml_backtester}.
+The main part of this diagram is the \texttt{MlBacktester} class. This class works as the main controller, managing different tasks and using other classes for specific jobs that represent the ML Pipeline~\ref{./pdf/ml_pipeline.pdf}, as described in the previous section~\ref{sec:ml_pipeline}.
+
+The configuration of the model, its parameters, and the dataset is managed by the \texttt{BacktesterConfig} class.
+Data preprocessing, feature engineering, transformation, and selection are handled by the \texttt{MlDataManager} and \texttt{MlFeatureEngineer} classes.
+
+For optimization purposes, \texttt{MlOptimizer} fine-tunes the model based on the configuration provided in \texttt{MlBacktesterConfig}.
+This class collaborates with \texttt{MlModelFactory} to instantiate models leveraging the \texttt{sklearn} library.
+
+Visualization related to model training and dataset analysis is done by the \texttt{MlDataPlotter} class.
+The \texttt{Performance} class computes the performance of both the machine learning-based strategy and its corresponding benchmark. The same class was utilized for Technical Indicator-based Backtesting from previous chapter~\ref{chap:technical_backtesting}),
+
+\begin{figure}[H]
 \centering
 \includegraphics[page=1, trim=30mm 100mm 30mm 30mm, width=1\textwidth, clip]{./pdf/ml_backtester.pdf}
 \caption{Architecture of the Automated Bot for Trading on the Binance Platform.}
@@ -316,40 +336,18 @@ The backtesting results show the potential of the model for real-world trading s
 \noindent
 
 
+\section{Feature Importance}
 
-\subsection{Feature Importance and Reduction}
+Feature importance gives a clear measure to understand how much each feature matters when the model makes predictions.
+Tree-based models like the  \texttt{AdaBoostClassifier}, referenced in fig. \ref{fig:backtest_res} and commonly found in the scikit-learn library, have an attribute called  \texttt{feature\_importances\_}`.
+This attribute derives its importance from the structure of trees and is inherent to models such as  \texttt{Decision Trees},  \texttt{Random Forests},  \texttt{Extra Trees},  \texttt{Gradient Boosted Trees}, and  \texttt{AdaBoost} when the base estimator is a \textbf{decision tree}.
 
-One of the many challenges in this is that adding more variables leads
-to ever more complexity, making it increasingly difficult to arrive at solid conclusions.
-Using dimensionality reduction techniques, we can compress many features
-and technical indicators into a few logical collections, while still maintaining a significant
-amount of the variance of the original data. This helps speed up model training
-and tuning. Additionally, it helps prevent overfitting by getting rid of correlated variables,
-which can ultimately cause more harm than good. Dimensionality reduction
-also enhances exploration and visualization of a dataset to understand grouping or
-relationships, an important task when building and continuously monitoring trading
-strategies.
+In the context of our analysis, the variable importance displayed in Figure \ref{fig:feature_importance} highlights which features play a major role in predictions.
+Features like STOCK\_10, STOROC\_10, and RSI\_10 emerge as some of the most influential, with a few others, including STOD\_10 and Stoch\_RSI\_10, also having considerable importance.
+The emphasis on these momentum indicators, particularly those over recent periods, underscores their relevance in predicting the target variable.
+Such prominence of these features reinforces the effectiveness of the model's predictions, indicating that introducing these features has positively impacted the model's performance.
 
-
-We create several new
-intuitive, technical indicator features, including trend, volume, volatility, and
-momentum. We apply dimensionality reduction techniques on these features in
-order to achieve better results.
-
-Using SVD and t-SNE to visualize data in lower dimensions
-
-We standardize the variables on the same scale before applying dimensionality reduction.
-
-Singular value decomposition (feature reduction). Here we will use SVD to perform
-PCA. Specifically, we are using the TruncatedSVD method in the sklearn package to
-transform the full dataset into a representation using the top five components
-
-
-Following the computation, we preserve 92.75% of the variance by using just five
-components rather than the full 25+ original features. This is a tremendously useful
-compression for the analysis and iterations of the model.
-
-\begin{figure}
+\begin{figure}[h]
 \centering
 \begin{adjustbox}{max width=1.2\textwidth,center}
 \includegraphics[scale=1.2]{./pdf/report/feature_importance.pdf}
@@ -359,10 +357,18 @@ compression for the analysis and iterations of the model.
 \end{figure}
 
 
-
+\section{Feature Reduction}
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.9\textwidth]{./pdf/report/explained\_variance.pdf}
+\includegraphics[width=0.9\textwidth]{./pdf/report/explained_variance.pdf}
 \caption{Explained Variance of Features after Performing Feature Reduction.}
 \label{fig:explained_variance}
 \end{figure}
+
+In trading too many features might sometimes weaken the model's performance, since many of these features can be redundant or just add noise.
+Furthermore, recalculating all these features every time the new market data arives can be time-consuming, which can slow down the model.
+To address this, dimensionality reduction techniques are employed. Through these methods, the number of features is reduced while preserving most of the important information. This makes model training faster and helps avoid problems like overfitting, where a model might perform well on training data but not on new, unseen data.
+The implemented ML Pipeline supports the dimensionality reduction. The implemented ML Pipeline supports dimensionality reduction, providing the method \texttt{perform\_svd} of \texttt{MlDataManager} that utilizes the \texttt{TruncatedSVD} functionality/module from the \texttt{sklearn} library,
+reducing the features through Principal Component Analysis (PCA) based on Singular Value Decomposition (SVD). The \texttt{plot\_explained\_variance} method of the \texttt{MlPlotter} class visualizes the reduced features and their aggregated variance,
+as depicted in fig.  \ref{fig:explained_variance}. This figure shows that just 10 components capture over 95\% of the important information in our dataset. This indicates that feature reduction can be very effective while still keeping most of the valuable data insights.
+
