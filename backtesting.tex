@@ -85,26 +85,26 @@ Given the configuration of parameter spaces for each algorithm, numerous combina
 The performance results for all these combinations are consolidated into a single CSV file, facilitating subsequent analysis.
 
 Consider the snapshot below, extracted from a more intricate configuration, as a case in point:
-\begin{verbatim}
-{
-    "opt_method": "bayesian",
-    "bayesian_trials": 1500,
-    "time_frame": {
-      "start_date": "",
-      "end_date": "2022-12-31 23:59:00"
-    },
-    "symbols": ["XRPUSDT", "LTCUSDT", "TRXUSDT"],
-    "strategies_config":
-    {
-      "freq" : [5, 125, 5],
 
-      "ema": {
-          "ema_s": [6, 60, 4],
-          "ema_l": [10, 200, 5]
-      }
+\begin{lstlisting}[style=jsonstyle, caption={Machine Learning Pipeline Configuration}]
+{
+  "opt_method": "bayesian",
+  "bayesian_trials": 1500,
+  "time_frame": {
+    "start_date": "",
+    "end_date": "2022-12-31 23:59:00"
+  },
+  "symbols": ["XRPUSDT", "LTCUSDT", "TRXUSDT"],
+  "strategies_config":
+  {
+    "freq" : [5, 125, 5],
+    "ema": {
+       "ema_s": [6, 60, 4],
+       "ema_l": [10, 200, 5]
     }
+  }
 }
-\end{verbatim}
+\end{lstlisting}
 
 Furthermore, individual backtesting results for each symbol and strategy can be visualized, as depicted in fig.~\ref{fig:backtest_results}.
 This figure showcases the performance results of the optimized strategy juxtaposed against the buy-and-hold strategy.

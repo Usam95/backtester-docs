@@ -13,14 +13,14 @@ PROJ_TEMP = [f"{PROJECT}.bbl", f"{PROJECT}.blg", f"{PROJECT}-blx.bib", f"{PROJEC
              f"{PROJECT}.out", f"{PROJECT}.run.xml", f"{PROJECT}.toc"]
 
 BIBTOOL = "bibtex"
-PDFVIEWER = "okular"
+PDFVIEWER = "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
 
 
 def generate_pdf():
     clean()  # Cleaning before generating the PDF
     subprocess.run(["pdflatex", PROJECT])
     subprocess.run([BIBTOOL, PROJECT])
-    subprocess.run(["pdflatex", PROJECT])
+    #subprocess.run(["pdflatex", PROJECT])
     subprocess.run(["pdflatex", PROJECT])
 
 
@@ -61,6 +61,7 @@ def main():
 
     if args.generate_pdf:
         generate_pdf()
+        view()
     if args.generate_docx:
         generate_docx()
     if args.clean:
