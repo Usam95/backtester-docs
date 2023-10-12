@@ -2,20 +2,13 @@
 \label{chap:technical_backtesting}
 
 
-Backtesting is the process of testing a trading strategy using historical data, allowing traders to evaluate and refine their
-strategies before implementing them in live markets.
-In this project, the implemented backtester provides vectorized backtesting for both technical indicator-based strategies
-and machine learning-based strategies.
-Vectorization, a form of array programming, allows operations typically done on scalars to be extended to multidimensional arrays.
-In Python's data ecosystem, \textit{pandas}, with its \textit{DataFrame} class, deeply integrates with \textit{NumPy}, benefiting from
-its vectorization principles.
-It facilitates compact code, faster execution compared to conventional Python loops, and efficient handling of time series data.
-This is particularly useful in financial algorithm implementations, especially vectorized backtesting.
+
+
+
 
 \section{Input Data}
 
-
-All the data used in this project is downloaded using the \texttt{data\_retriever} module, which establishes a connection with the Binance server
+ All the data used in this project is downloaded using the \texttt{data\_retriever} module, which establishes a connection with the Binance server
  and downloads data for defined crypto symbols (a crypto symbol represents a specific cryptocurrency,
 like BTC for Bitcoin or ETH for Ethereum) over a specified time span and interval.
 The downloaded data is stored in the \texttt{historical\_data} directory. Each symbol has its own directory, where the corresponding data is
