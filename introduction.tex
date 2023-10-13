@@ -5,6 +5,9 @@ Trading involves buying and selling assets like stocks and cryptocurrencies to m
 
 Backtesting is the process of testing a trading strategy using historical data, allowing traders to evaluate and refine their strategies before they use them in real trading. Driven by my hypothesis, questioning if algo trading strategies can indeed be beneficial, I found myself investing a significant amount of my personal time diving into the topic of algorithmic trading. Armed with the knowledge I gained and leveraging my data science and software engineering expertise, I started on building this backtesting framework. Throughout this journey, I wrote more than 7,000 lines of code to create a modular and customizable framework designed for evaluating various trading strategies, covering both technical indicators and machine learning methods.
 
+While originally designed for cryptocurrency markets, the adaptability of the framework allows its application across various markets, including stocks, energy, and more.
+As long as the input data conforms to the Open, High, Low, Close, Volume (OHLCV) format, the backtesting framework can be utilized.
+
 This framework leverages the vectorized approach of Python, facilitating compact code, faster execution compared to conventional Python loops, and efficient handling of time series data. Such an approach is particularly advantageous in financial algorithm implementations, especially when it comes to vectorized backtesting.
 
 The next section provides a brief overview of the main features of the framework. Detailed explanations of these features are provided in the following chapters.
@@ -13,20 +16,33 @@ The next section provides a brief overview of the main features of the framework
 \section{Key Highlights}
 
 \begin{itemize}
-    \item \textbf{Efficient Backtesting}: The project utilizes vectorized backtesting algorithms for testing and optimization of both classical technical indicator-based and machine learning strategies. It incorporates pre-existing technical indicators such as MACD, EMA, RSI, BB, SO, and RS, along with a variety of machine learning classification algorithms like logistic regression, SVM, and tree-based algorithms (e.g., Random Forest, AdaBoost, Gradient Boosting Classifier). Moreover, the system is architected for easy extensibility, allowing the integration of new algorithms without altering previously implemented and validated code. \newpage
-
-    \item \textbf{Data Source}: The data for this project is directly sourced from Binance using the \textit{data\_retriever} module, primarily in 1-minute intervals. This data can be downsampled to longer intervals, allowing backtests over extended periods when necessary.
-
-    \item \textbf{Dynamic Optimization}: Both the implemented technical indicators and machine learning models can be tested and optimized based on various performance metrics. Parameter spaces for optimization can be easily configured for each strategy in the dedicated JSON configuration file. Currently, the optimization supports GridSearch for both technical indicators and machine learning, as well as Bayesian Optimization for technical indicators. Support for additional optimization techniques will be added in the future.
-
-    \item \textbf{User-centric Configurations}: As previously mentioned, the optimization of technical indicators and machine learning models is supported through configuration files. User-friendly configurations can also be set up for deployment, where the algorithms to be used, the symbols to be traded, and various other parameters can be specified.
-
-    \item \textbf{Deployment Simplified}: Post-backtesting, the fine-tuned strategies are primed for real trading sessions. The trading infrastructure is also designed to be adaptable and can interface with any broker that provides a trading API. At present, a Binance client is incorporated into the system. To accommodate new brokers, a distinct module would need to be developed, leveraging the interfaces for strategies and the data manager that supplies the trading signals. The system is engineered to support multiple strategies and symbols concurrently.
-
-    \item \textbf{Real-time Notifications}: Thanks to integrated logging mechanisms and email notifications, users remain consistently informed regarding backtesting outcomes and live trading activities.
-
+    \item \textbf{Efficient Backtesting}: In the current version of the framework, backtesters for the following technical indicators are implemented:
+\begin{itemize}
+    \item Moving Average Convergence Divergence (MACD)
+    \item Exponential Moving Average (EMA)
+    \item Relative Strength Index (RSI)
+    \item Bollinger Bands (BB)
+    \item Stochastic Oscillator (SO)
 \end{itemize}
+Additionally, various classification machine learning models are supported, as detailed in the next Chapter \ref{chap:ml_backtester}.
+Furthermore, the system is designed with modularity in mind, ensuring easy extensibility.
+New strategies can be seamlessly integrated by simply adding new classes with the desired implementations, eliminating the need to modify previously implemented and validated code.
+    \item \textbf{Data Source}: The data for this project is directly sourced from Binance using the \texttt{data\_retriever} module, primarily in 1-minute intervals.
+The data for this project is directly sourced from Binance using the \texttt{data\_retriever} module, primarily in 1-minute intervals.
 
+    \item \textbf{Optimization Support}: The strategies using based on technical indicators and machine learning models can be backtested and fine-tuned using different performance measures. Settings for optimization can be set in a special JSON configuration file (see lst. ~\ref{lst:ml_config}).
+Currently, the optimization supports GridSearch for both technical indicators and machine learning models, as well as Bayesian Optimization
+for technical indicators.
 
+    \item \textbf{Configuration Support}: As mentioned earlier, both technical indicators and machine learning models can be configured for optimization using JSON configuration files. These files also allow to easily set up deployment settings, including choosing algorithms, deciding which symbols to trade, and setting other parameters.
+
+    \item \textbf{Deployment Simplified}: After backtesting, the optimized amd backtested strategies can be used for actual trading.
+The deployment infrastructure is designed to be adaptable and can be extended to support brokers with API capabilities for algorithmic trading.
+The deployed trading system can manage multiple symbols, applying various strategies to each symbol at the same time.
+
+    \item \textbf{Notifications Support}: Thanks to integrated logging mechanisms and email notifications, users remain consistently informed regarding backtesting outcomes and live trading activities.
+\end{itemize}
 %As shown in Figure~\ref{fig:projectStructure}, the project is organized into several directories...
+
+
 
