@@ -1,7 +1,8 @@
-\chapter{Machine Learning based Backtesting}
+\chapter{Machine Learning based Backtesting}\label{chap:ml_bactesting}
 
-In the world of machine learning (ML), classification is about sorting things into categories. When applied to trading, ML Models predict whether the price will go up or down based on today's as well as historical data.
-Using ML to predict trading outcomes requires a systematic approach.
+In the world of machine learning (ML), classification is about sorting things into categories.
+When applied to trading, ML Models predict whether the price will go up or down based on today's as well as historical data.
+Using ML for algorithmic trading requires a systematic approach.
 This structured process is visualized as a pipeline, detailed in fig. \ref{fig:ml_pipeline}.
 
 %trim=left bottom right top,
@@ -11,19 +12,20 @@ This structured process is visualized as a pipeline, detailed in fig. \ref{fig:m
 \begin{figure}[H]
 \centering
 \includegraphics[trim=25mm 220mm 55mm 30mm, width=1.2\textwidth, clip]{./pdf/ml_pipeline.pdf}
-\caption{Machine Learning Trading Pipeline: A visualization of the process, detailing steps from data acquisition and preprocessing, feature engineering and transformation, model training and optimizing, to the final execution and evaluation of trades based on model predictions.}
+\caption{Machine Learning Trading Pipeline: Process steps from data acquisition and preprocessing, feature engineering and transformation, model training and optimization, to the final execution and evaluation of trades based on model predictions.}
 \label{fig:ml_pipeline}
 \end{figure}
 
-This pipeline initiates with raw historical data sourced from Binance and advances through a series of steps
-leading to informed trading decisions. The process involves backtesting using the trained and optimized ML model on the historical data.
+The process begins by loading historical data previously downloaded from Binance and then proceeds with backtesting using the trained and optimized ML model on that data.
 The pipeline steps can also be executed independently.
-For instance, starting with data ingestion and preprocessing can be followed by feature engineering and data visualization to gain a deeper understanding of the dataset. The steps of the pipeline in  fig. \ref{fig:ml_pipeline}. are detailed in the subsequent subsections.
+For instance, starting with data ingestion and preprocessing can be followed by feature engineering and data visualization to gain a deeper understanding of the dataset.The steps of the pipeline in fig. \ref{fig:ml_pipeline} are detailed in the subsequent subsections.
 
 \subsection{ML Trading Pipeline Configuration}
-The following JSON configuration in lst. \ref{lst:pipeline_conf} is used to set up the machine learning pipeline.
-The \texttt{dataset\_conf} element specifies details such as the cryptocurrency symbol to be backtested (BTCUSDT in this case), the frequency of the time series data, and the start and end dates. Additionally, it offers an option to set the date for splitting the dataset into training and test sets.
-The configuration also includes options to set the desired model and specify the parameter ranges. This enables fine-tuning via grid search for the selection of optimal parameters.
+The JSON configuration in lst.~\ref{lst:pipeline_conf} is used to set up the machine learning pipeline.
+The \texttt{dataset\_conf} element specifies details such as the cryptocurrency symbol to be backtested (BTCUSDT in this case), the frequency of the time series data, and the start and end dates.
+Furthermore, it provides the option to specify the date for splitting the dataset into training and test sets.
+The configuration also includes options to set the desired model and specify the parameter ranges.
+This enables fine-tuning via grid search for the selection of optimal parameters.
 Also the \texttt{target\_conf} element allows for the selection of the target for the classification model. There are several target variants to choose from, that are describe later.
 
 
@@ -62,11 +64,10 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
 
 
 \subsection{Data Ingestion and Preprocessing}
-The first step involves ingesting the data required for backtesting. This data can be sourced from Binance using the \texttt{data\_retrieve.py} module, as detailed in the previous chapter.
+The first step involves ingesting the data required for backtesting.
+This data can be sourced from Binance using the \texttt{data\_retrieve.py} module, as detailed in the previous chapter.
 The data is saved in the \texttt{historical\_data} folder, which is located within the corresponding symbol's subfolder, created during the data download process.
-Once the data has been retrieved, it can be ingested into the pipeline. It's recommended to retrieve data with a one-minute time bar length,
-as this can be efficiently downsampled later for larger intervals such as an hour or a day.
-This is done during the data preprocessing phase. The ingested data is downsampled based on the bar length specified in the configuration (refer to \lstinline[label=lst:pipeline_conf]{lst:pipeline_conf}, line 5), where the \texttt{freq} parameter is set to \texttt{1d}.
+After loading the stored data into pipeline, is downsampled based on the bar length specified in the configuration (see~\ref{lst:pipeline_conf}, where the \texttt{freq} parameter is set to \texttt{1d}.
 Furthermore, a validation check is run to ensure data integrity.
 
 %\vspace{20mm} % Put space between figure and subsection title
@@ -77,7 +78,9 @@ Feature engineering is a critical step in improving the model's predictive capab
 The goal is to identify features that could potentially influence the model's performance.
 Technical indicators are utilized to create features that help models predict upcoming price movements based on historical market data.
 The technical indicators used in the \texttt{ml\_feature\_engineer} module can be broadly categorized into momentum-based, trend-based, and volume-based.
-
+Additionally, in this pipeline stage, more features can be created and added into the dataset.
+This can be achieved by adding the new relevant methods to the \texttt{FeatureEngineer} class.
+Ths methods should be called within the \texttt{add\_features} method of the same class.
 
 \begin{itemize}
     \item \textbf{Momentum-based Indicators:} These are primarily concerned with the speed of price movements. Features like Rate of Change (ROC), Momentum, variations of the Stochastic Oscillator, and the Relative Strength Index (RSI) fall into this category.
@@ -86,7 +89,6 @@ The technical indicators used in the \texttt{ml\_feature\_engineer} module can b
 
     \item \textbf{Volume-based Indicators:} Volume, in trading, refers to the number of shares or contracts traded in a security or market. The feature set for this category includes the On-Balance Volume (OBV).
 \end{itemize}
-
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=pythonstyle, language=Python, caption={Function to add features to the dataset},  captionpos=b, label=lst:add_features_function]
@@ -115,7 +117,7 @@ def add_features(self):
 \end{minipage}
 
 
-Following this, a target is computed, which can also be specified in the configuration file. The available target variants include:
+Following this, a target for classification ML model is computed, which can also be specified in the configuration file. The available target variants include:
 \begin{itemize}
     \item \textbf{Simple}: Predicts if the next day's price will go up or down based on today's closing price.
     \item \textbf{MA\_Relative}: Checks if today's closing price is above its short-term average and rising.
@@ -129,28 +131,30 @@ Following this, a target is computed, which can also be specified in the configu
 \begin{adjustbox}{max width=1\textwidth,center}
     \includegraphics[scale=1]{./pdf/dataset_histogram.pdf}
 \end{adjustbox}
-\caption{Histogram of engineered features from the BTCUSDT historical data.}
+\caption{Histogram of created features from the BTCUSDT historical data.}
 \label{fig:dataset_histogram}
 \end{figure}
 
  %Confusion matrix (left) presenting actual versus predicted values, alongside key performance metrics (right) indicating the model's accuracy, precision, recall, and F1 score.}
 \subsection{Feature Transformation}
 
-After engineering the features, it's essential to transform them to meet the specific requirements of machine learning models. Many algorithms have assumptions about the data's scale and distribution.
-Hence, features undergo transformations using techniques like \texttt{Standardization} and {MinMax Scaling}.
+After engineering the features, it's essential to transform them to meet the specific requirements of machine learning models.
+Many algorithms have assumptions about the data's scale and distribution.
+Hence, features undergo in this pipeline step the transformations using techniques like \texttt{Standardization} and {MinMax Scaling}.
 
-It's importan to apply the same transformations with according parameters, to both the training and testing datasets or any new incoming data. This ensures consistent and accurate model predictions.
+It's important to apply the same transformations with according parameters, to both the training and testing datasets or any new incoming data.
+This ensures consistency in model predictions.
 
-The entire transformation workflow, from data loading, preprocessing, to feature-related operations, is orchestrated by the \texttt{DataManager} and \texttt{FeatureEngineer} classes (fig. \ref{fig:dataManagerFeatureEngineer}).
-
-
+The entire transformation workflow, from data loading, preprocessing, to feature-related operations, is managed by the \texttt{DataManager} and \texttt{FeatureEngineer} classes (see fig.~\ref{fig:ml_backtester}).
 
 \subsection{Data Visualization}
-For data analysis the \texttt{ml\_model\_evaluator} module was implemented with appropriate methods. It provides tools for both data and model checks.
+For data analysis the \texttt{ml\_model\_evaluator} module was implemented with appropriate methods (see fig.~\ref{fig:ml_backtester}).
+It provides tools for both data and model checks.
 The prepared data can be visualized in various ways, including target distributions, feature covariance matrices, and feature histograms.
 
 The \textbf{distribution of the predicted variable} across both training and validation datasets is showed in fig. \ref{fig:signal_distribution}.
-Notably, the distribution between the two classes (1's and 0's) is nearly balanced in both datasets. Such a balanced distribution is crucial for training machine learning models effectively, ensuring that they aren't biased towards one class.
+Notably, the distribution between the two classes (1's and 0's) is nearly balanced in both datasets.
+Such a balanced distribution is crucial for training machine learning models effectively, ensuring that they aren't biased towards one class.
 
 \begin{figure}[h]
 \centering
@@ -161,7 +165,7 @@ Notably, the distribution between the two classes (1's and 0's) is nearly balanc
 \label{fig:signal_distribution}
 \end{figure}
 
-The fig. \ref{fig:corr_coef} illustrates the \textbf{correlation coefficients} between various feature variables in the dataset.
+The fig.~\ref{fig:corr_coef} illustrates the \textbf{correlation coefficients} between various feature variables in the dataset.
 Each cell in the matrix represents the degree of correlation between two features: a value close to 1, represented by dark green, signifies a strong positive correlation, while a value close to -1, shown in white, indicates a strong negative correlation.
 
 %trim=left bottom right top,
@@ -174,18 +178,20 @@ Each cell in the matrix represents the degree of correlation between two feature
 \label{fig:corr_coef}
 \end{figure}
 
-The fig. \ref{fig:dataset_histogram} presents a \textbf{histogram} showcasing the distribution of engineered features derived from the BTCUSDT historical data. Each bar in the histogram represents the frequency of occurrences for a particular value or range of values. This visualization provides insights into the distribution patterns and potential skewness of the different features in the dataset.
-
+The \textbf{histogram} fig.~\ref{fig:dataset_histogram} presents the distribution of engineered features derived from the BTCUSDT historical data.
+Each bar in the histogram represents the frequency of occurrences for a particular value or range of values.
+This visualization provides insights into the distribution patterns and potential skewness of the different features in the dataset.
 
 
 \subsection{Model Training and Optimization}
 The logic for model training and backtesting is encapsulated within the \texttt{ml\_backtester.py} module,
-while the \texttt{ml\_optimizer.py} module is dedicated to optimization purposes, as depicted in Figure \ref{fig:<your_figure_label_here>}.
+while the \texttt{ml\_optimizer.py} module is dedicated to optimization purposes, as depicted in fig.~\ref{fig:ml_backtester}.
 The \texttt{\_optimize\_model} function in the \texttt{ml\_backtester.py} module is responsible for the model optimization process.
-It utilizes the instance of the MlOptimizer class to perform searching for the best parameters of the model using techniques such as Grid Search with Cross-Validation.
-In a grid search, a grid of all possible hyperparameter combinations is created, and the model is trained using each one of them. The best model is then used in the \texttt{\_generate\_predictions}
-function to predict the trends in price movements on unseen data. Once optimized, the trained model specific to a cryptocurrency can be saved for subsequent use and reloaded as needed.
-Model specifics, such as the model type (for instance, AdaBoostClassifier) and its hyperparameter ranges, are defined in the JSON configuration file (see lst. \ref{lst:pipeline_conf}).
+It utilizes the instance of the  \texttt{MlOptimizer} class to perform searching for the best parameters of the model using techniques such as Grid Search with Cross-Validation.
+In a grid search, a grid of all possible hyperparameter combinations is created, and the model is trained using each one of them.
+The best model is then used in the \texttt{\_generate\_predictions} function to predict price movements trends on unseen data.
+Once optimized, the trained model specific to a cryptocurrency can be saved for subsequent use and reloaded as needed.
+As previously mentioned, all model details including the model type (for instance, AdaBoostClassifier) and its hyperparameter ranges can be configured in the appropriate config file (see lst. \ref{lst:pipeline_conf}).
 
 
 \noindent\begin{minipage}{\linewidth}
