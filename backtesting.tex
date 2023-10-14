@@ -2,50 +2,47 @@
 \label{chap:technical_backtesting}
 
 
-
-
-
-
 \section{Input Data}
 
- All the data used in this project is downloaded using the \texttt{data\_retriever} module, which establishes a connection with the Binance server
- and downloads data for defined crypto symbols (a crypto symbol represents a specific cryptocurrency,
-like BTC for Bitcoin or ETH for Ethereum) over a specified time span and interval.
+All the cryptocurrency historical data used in this project was downloaded using the \texttt{data\_retriever} module, which establishes a connection with the Binance server
+and fetches data for defined crypto symbols (a crypto symbol represents a specific cryptocurrency,
+like BTC for Bitcoin or ETH for Ethereum) over a specified period.
 The downloaded data is stored in the \texttt{historical\_data} directory. Each symbol has its own directory, where the corresponding data is
-saved in a \texttt{.csv.parquet} format.
+saved in a \texttt{.parquet.gzip} format.
 Data is downloaded at a one-minute frequency but can be downsampled to longer intervals, such as 1 hour or 1 day.
 
-The \texttt{load\_data.py} module facilitates loading the historical data of a symbol from its \texttt{.csv} file for use in backtesting strategies.
+The \texttt{load\_data.py} module facilitates loading the historical data of a symbol from its \texttt{.parquet.gzip} file for use in backtesting strategies.
 
 \begin{figure}[h]
 \dirtree{%
 .1 backtester.
 .2 historical\_data.
 .3 BTCUSDT.
+.4 BTCUSDT.parquet.gzip.
 .3 ETHUSDT.
+.4 ETHUSDT.parquet.gzip.
 .3 \ldots.
 .2 \ldots.
 .2 utilities.
 .3 data\_utils.
 .4 data\_loader.py.
-.4 data\_manager.py.
 .4 data\_retriever.py.
+.4 ml\_data\_manager.py.
+.4 ml\_feature\_engineer.py.
 }
 
 \caption{Data-centric modules and folders.}\label{fig:inputdata}
 \end{figure}
 
 \section{Technical Indicator-based Strategies}
-
-Technical indicators are mathematical calculations based on historical price, volume, or open interest information that aim to predict future price movements.
+Technical indicators are statistical calculations based on historical price and volume information that aim to predict future price movements.
 Commonly used in technical analysis, these indicators provide insight into the market's direction, strength, momentum, and volatility.
-Currently, the backtester supports technical indicators such as BB, EMA, RSI, MACD, SMA, and SO. However, it's designed to easily
-accommodate and backtest additional technical indicators as needed.
-The backtesting architecture, including relevant classes and components for technical indicator-based strategies, is illustrated in UML diagram \ref{fig:tech_indicator_arch}.
-
-Technical indicators are mathematical calculations based on historical price, volume, or open interest information that aim to predict future price movements.
-Commonly used in technical analysis, these indicators provide insight into the market's direction, strength, momentum, and volatility.
-\noindent
+The backtesting architecture, including the necessary classes and components for strategies based on technical indicators is depicted in UML diagram~\ref{fig:tech_indicator_arch}.
+One of the main advantages of the framework is its extensibility. It allows the integration and configuration of new strategies.
+To integrate a new algorithm, it should inherit from the \texttt{BacktesterBase} class found in the \texttt{backtester\_base.py} module. Additionally, it must implement the following methods: \texttt{prepare\_data}, \texttt{optimize\_strategy}, \texttt{objective()}, and \texttt{test\_strategy()}.
+Figure~\ref{fig:tech_indicator_arch} showcases the framework's architecture specifically for technical indicator-based backtesting.
+The \texttt{MacdBacktester} class (highlighted in red) inherits common attributes and methods from the \texttt{BacktesterBase} class,
+such as \texttt{get\_data}, \texttt{run\_backtest}, \texttt{add\_stop\_loss}, and \texttt{add\_take\_profit}, among others.
 
 \begin{figure}[ht!]
 \centering
@@ -54,32 +51,20 @@ Commonly used in technical analysis, these indicators provide insight into the m
 \label{fig:tech_indicator_arch}
 \end{figure}
 
-\noindent
-Technical indicators are mathematical calculations based on historical price, volume, or open interest information that aim to predict future price movements.
-Commonly used in technical analysis, these indicators provide insight into the market's direction, strength, momentum, and volatility.
+The \texttt{DataPlotter} and \texttt{Performance} classes are utilized to compute and visually display performance metrics for each test run.
+The \texttt{Backtester} class manages the entire backtesting process, leveraging the functionalities of other classes to perform its tasks.
+The \texttt{BacktesterConfig} class represents the configuration, which is validated and ingested in the \texttt{Backtester} class via the Python \texttt{pydantic} library.
 
-The cornerstone of this framework lies in its automated, vectorized backtesting, which furnishes a remarkably efficient backtesting utility.
-The framework incorporates two distinct backtesting variations: one for machine learning-based models and another for technical indicator-based models.
-A notable feature of the framework is its extensibility; new testing algorithms can be seamlessly incorporated and configured.
-For integration, each new algorithm should inherit from the \texttt{BacktesterBase} class, located in the \texttt{backtester\_base.py} module.
-Furthermore, they must implement the methods: \texttt{prepare\_data}, \texttt{optimize\_strategy}, \texttt{objective()}, and \texttt{test\_strategy()}.
+For optimization, either the grid search method or the Bayesian method can be chosen. The former comprehensively explores all possible combinations in the parameter ranges,
+while the latter utilizes probability distributions to refine its search. Depending on the defined parameter ranges for each algorithm, a vast array of combinations, potentially
+in the tens of thousands, can be assessed for each symbol. Performance results for all these tests are saved into a dedicated \texttt{\{symbol\}.csv} file
+located in the \texttt{results/\{symbol\}} directory, facilitating subsequent analysis and visualizations.
 
-Figure \ref{fig:tech_indicator_arch} delves into the architecture of the technical indicator-based backtesting component within the framework.
-Notably, the UML class (delineated in red) titled \texttt{MacdBacktester} is a descendant of the \texttt{BacktesterBase} class.
-This base class equips all models with essential methods such as \texttt{get\_data}, \texttt{run\_backtest}, \texttt{add\_stop\_loss}, and \texttt{add\_take\_profit}, to name a few.
-Additional classes, namely \texttt{DataPlotter} and \texttt{Performance}, are harnessed to compute and graphically represent performance metrics for each test.
 
-A pivotal aspect of this framework is the adaptability of each algorithm's parameters.
-Users have the flexibility to configure the parameter spaces via the JSON file named \texttt{backtesterconfig}.
-This configuration is subsequently ingested and validated through \texttt{pydantic}.
-For optimization, users can employ either the grid search method or the Bayesian method.
-While grid search explores all possible combinations in the parameter space, the Bayesian approach uses probability distributions to improve the search.
-Given the configuration of parameter spaces for each algorithm, numerous combinations---potentially tens of thousands---can be tested for each symbol.
-The performance results for all these combinations are consolidated into a single CSV file, facilitating subsequent analysis.
+The Listing~\ref{lst:ml_config} shows how the Backtester is set up to run backtests for XRP, LTC, and TRX with an EMA-based strategy.
+The Bayesian method is used for optimization, and EMA parameter ranges are defined. Each symbol's results will be stored in its respective .csv file.
 
-Consider the snapshot below, extracted from a more intricate configuration, as a case in point:
-
-\begin{lstlisting}[style=jsonstyle, caption={Machine Learning Pipeline Configuration}]
+\begin{lstlisting}[style=jsonstyle, caption={Machine Learning Pipeline Configuration},  label=lst:ml_config]
 {
   "opt_method": "bayesian",
   "bayesian_trials": 1500,
@@ -99,10 +84,11 @@ Consider the snapshot below, extracted from a more intricate configuration, as a
 }
 \end{lstlisting}
 
-Furthermore, individual backtesting results for each symbol and strategy can be visualized, as depicted in fig.~\ref{fig:backtest_results}.
-This figure showcases the performance results of the optimized strategy juxtaposed against the buy-and-hold strategy.
-As an illustrative example, the EMA strategy for LTCUSDT is spotlighted. All pertinent parameters are illustrated above the primary plot.
-Testing was executed on historical data spanning from 2021-01-01 to 2021-12-31.
+Furthermore, individual backtesting results for each symbol and applied strategy can be visualized,
+as shown in fig.~\ref{fig:backtest_results}. This figure displays the effectiveness of the optimized strategy
+compared to the buy-and-hold approach. As an example, the \texttt{EMA} strategy was used for the \texttt{LTCUSDT} symbol. All pertinent parameters are
+illustrated above the primary plot. Testing was executed on historical data ranging
+from 2021-01-01 to 2021-12-31.
 
 \begin{figure} [H]
 \centering
@@ -111,23 +97,23 @@ Testing was executed on historical data spanning from 2021-01-01 to 2021-12-31.
 \label{fig:backtest_results}
 \end{figure}
 
-The secondary plot, detailing close prices, accentuates the drastic price fluctuations during this period.
-Impressively, the algorithm managed to surpass the buy-and-hold strategy, achieving an outperformance of 0.953 (which can be construed as a 95\% enhancement).
-Furthermore, individual backtesting results for each symbol and strategy can be visualized, as depicted in fig.~\ref{fig:backtest_results}.
+The secondary plot, demonstrates the close prices of LTCUSDT,
+marked with buy (red triangle) and sell (green triangle) signals generated by the EMA strategy.
+The bottom plot, "Market Positioning", illustrates the duration of each position, with 1 indicating a long position and 0 no position.
 
 \begin{table}[H]
     \centering
     \begin{tabular}{l}
-        \texttt{LTCUSDT | EMA : (freq = 125 , ema\_s\_val = 50 , ema\_l\_val = 200 )} \\
-        \texttt{Strategy Multiple = 2.065 , Buy/Hold Multiple = 1.09 ,} \\
+        \texttt{LTCUSDT | EMA : (freq = 125 , ema\_s\_val = 50 , ema\_l\_val = 200)} \\
+        \texttt{Strategy Multiple = 2.065 , Buy/Hold Multiple = 1.09} \\
         \texttt{Net Out-/Under Perf = 0.953 , Num Trades = 14} \\
     \end{tabular}
+    \caption{Backtesting results and parameters for the EMA strategy on LTCUSDT .}
+    \label{tab:backtest_results}
 \end{table}
-This figure showcases the performance results of the optimized strategy juxtaposed against the buy-and-hold strategy.
-As an illustrative example, the EMA strategy for LTCUSDT is spotlighted. All pertinent parameters are illustrated above the primary plot.
-Testing was executed on historical data spanning from 2021-01-01 to 2021-12-31.
-The secondary plot, detailing close prices, accentuates the drastic price fluctuations during this period.
-Impressively, the algorithm managed to surpass the buy-and-hold strategy, achieving an outperformance of 0.953 (which can be construed as a 95\% enhancement).
+
+Table~\ref{tab:backtest_results} provides a detailed overview of the parameters used for the EMA strategy, such as frequencies, long and short window periods as well as performance metrics.
+The strategy  performed quite well and outperformed the buy-and-hold benchmark, achieving an outperformance of a 95\%.
 % trim={<left> <lower> <right> <upper>}
 %\vspace{-2cm}
 
