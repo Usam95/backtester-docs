@@ -195,10 +195,10 @@ As previously mentioned, all model details including the model type (for instanc
 
 
 \noindent\begin{minipage}{\linewidth}
-\begin{lstlisting}[style=pythonstyle, language=Python, caption={Function of MlBacktester class for model optimization and predictions.},  captionpos=b, label=lst:add_features_function]
+\begin{lstlisting}[style=pythonstyle, language=Python, caption={Functions of MlBacktester class for model optimization and predictions.},  captionpos=b, label=lst:add_features_function]
 def _optimize_model(self):
    # Instantiate the GridSearchOptimizer
-   optimizer = GridSearchOptimizer(self.data_manager.X_train,
+   optimizer = MlOptimizer(self.data_manager.X_train,
                                 self.data_manager.y_train,
                                 self.config.dataset_conf.symbol,
                                 task_type=self.config.model_type,
@@ -224,12 +224,12 @@ def _generate_predictions(self):
 
 
 \subsection{Model Evaluation using Classification Metrics}
-After training the trading model's performance can be evaluated using several metrics. These metrics provide insights into the model's predictions and highlight potential areas for improvement.
+Once the trading model is trained, its performance can be assessed using various metrics.
+These metrics provide insights into the model's predictions and highlight potential areas for improvement.
 The performance data for both the training and testing of the model are visualized in fig. \ref{fig:conf_matrix}.
-For each phase (training and testing):
-
-The left diagram presents the confusion matrix, which shows the number of correct and incorrect predictions made by the model.
-The right diagram visualizes key performance metrics, specifically: accuracy, precision, recall, and F1 score. Each metric is also further described in  more detail below.
+For each phase (training and testing): The left diagram presents the confusion matrix, which shows the number of correct and incorrect predictions made by the model.
+The right diagram visualizes key performance metrics, specifically: accuracy, precision, recall, and F1 score.
+Each metric is also further described in more detail below.
 \begin{figure}[h]
     \centering
 
@@ -258,11 +258,12 @@ The right diagram visualizes key performance metrics, specifically: accuracy, pr
 \begin{itemize}
 	\item \textbf{True Positive:} Represents the number of times the model correctly predicted an upward trend and the price actually went up.
 
-	\item \textbf{True Negative:} Represents the number of times the model correctly predicted a downward trend and the price actually went down.
+	\item \textbf{True Negative:} Refers to the instances where the model accurately predicted a downward trend, and the price indeed decreased.
 
-	\item \textbf{False Positive:} Represents the number of times the model incorrectly predicted an upward trend and the price went down or stayed the same. This type of error could result in a missed shorting opportunity or a loss if one decided to buy in Long Only strategies.
+	\item \textbf{False Positive:} Represents instances where the model incorrectly predicted an upward trend, but the price either decreased or remained unchanged.
+                                    Such errors could lead to missed shorting opportunities or potential losses in Long Only strategies.
 
-	\item \textbf{False Negative:} Represents the number of times the model incorrectly predicted the downward trend and the price went up or stayed the same. This type of error could result in missed profit opportunities from not buying.
+	\item \textbf{False Negative:} Represents the number of times the model incorrectly predicted the downward trend and the price went up or stayed the same. This type of error could result in missed profit opportunities due to the decision not to buy.
 
 	\item \textbf{Recall:} The ratio of the number of correct positive predictions (TP) to the total actual positives (TP + FN). In mathematical terms, Recall $= \frac{TP}{TP + FN}$. In trading, it indicates how well the model identifies actual upward movements. A high recall means the model captures most of the upward trends, but this can also be achieved at the expense of more false positives.
 
@@ -270,28 +271,18 @@ The right diagram visualizes key performance metrics, specifically: accuracy, pr
 
 	\item \textbf{Accuracy:} The ratio of correct predictions (both TP and TN) to the total number of predictions (TP + TN + FP + FN). In mathematical terms, Accuracy $= \frac{TP + TN}{TP + TN + FP + FN}$. In trading, it gives an overall measure of how often the model is correct, regardless of whether it's predicting upward or downward movement.
 
-	\item \textbf{F1 Score:} The harmonic mean of precision and recall, providing a balance between the two. It is given by the formula: F1 $= 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$. It's especially useful when the class distribution is imbalanced. In trading, a high F1 score suggests the model has a balanced performance in terms of identifying upward trends and avoiding false alarms.
+	\item \textbf{F1 Score:} The harmonic mean of precision and recall, providing a balance between the two.
+    \item It is given by the formula: F1 $= 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$. It's especially useful when the class distribution is imbalanced. In trading, a high F1 score suggests the model has a balanced performance in terms of identifying upward trends and avoiding false alarms.
 \end{itemize}
 
 
 \subsection{Backtesting and Analysis}
 After the model is trained and fine-tuned, it's crucial to check how good it is by testing its effectiveness not just on the basis of typical classification metrics but also on how well it performs in a simulated trading environment.
 
-The code listing \ref{lst:add_features_function} showcases the \texttt{run\_strategy} function, a part of the \texttt{MlBacktester} class. This function is designed to run the backtesting process:
+The code listing \ref{lst:add_features_function} showcases the \texttt{run\_strategy} function, a part of the \texttt{MlBacktester} class.
+This function is designed to run the backtesting process.
 
-\begin{figure}[h]
-\centering
-\begin{adjustbox}{max width=1.3\textwidth,center}
-\includegraphics[scale=1.3]{./pdf/report/backtest_res.pdf}
-\end{adjustbox}
-\caption{Feature Significance in Model Prediction}
-\label{fig:backtest_res}
-\end{figure}
 
-After generating predictions, the strategy values are calculated. These strategy values reflect the positions the model would take based on its predictions.
-Further, trades are determined and adjustments are made to account for transaction costs, which are often overlooked but can significantly impact net returns in real-world scenarios.
-Finally, cumulative metrics are computed, followed by a performance evaluation to assess the overall success of the trading strategy.
-By summing the strategy returns, the model's hypothetical profitability over the backtesting period is determined.
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=pythonstyle, language=Python, caption={\vspace*{1cm}Function of MlBacktester class for backtesting execution.},  captionpos=b, label=lst:add_features_function]
@@ -307,21 +298,40 @@ def run_strategy(self):
 \end{lstlisting}
 \end{minipage}
 
+
+After generating predictions, the strategy values are calculated.
+These strategy values reflect the positions the model would take based on its predictions.
+Further, trades are determined and adjustments are made to account for transaction costs, which are often overlooked but can significantly impact net returns in real-world scenarios.
+Finally, cumulative metrics are computed, followed by a performance evaluation to assess the overall success of the trading strategy.
+By summing the strategy returns, the model's hypothetical profitability over the backtesting period is determined.
+
+\begin{figure}[h]
+\centering
+\begin{adjustbox}{max width=1.3\textwidth,center}
+\includegraphics[scale=1.3]{./pdf/report/backtest_res.pdf}
+\end{adjustbox}
+\caption{Feature Significance in Model Prediction}
+\label{fig:backtest_res}
+\end{figure}
+
 A common benchmark to assess the strategy's success is the "buy and hold" method.
 In this approach, the asset is bought and kept throughout the entire period without incurring extra costs or decisions based on price changes.
 Comparing the total strategy returns to the "buy and hold" method's returns provides an understanding of the ML-based strategy's added benefit.
-If the model outperformes this benchmark, it can be considered as useful for trading. The fig. \ref{fig:backtest_res} illustrates the comparison between the returns of the "buy and hold" strategy and those of the configured \texttt{AdaBoostClassifier} model's strategy.
-The model's strategy achieved a return multiple of 4.376. This surpasses the 3.633 return from the "buy and hold" method, resulting in a net outperformance of 0.743, or 74.3\%.
-This outperformance is observed at the end of the backtesting period, which can also be configured in the JSON configuration shown in lst. \ref{lst:pipeline_conf}.
+If the model outperformes this benchmark, it can be considered as useful for trading.
+The fig. \ref{fig:backtest_res} illustrates the comparison between the returns of the "buy and hold" strategy and those of the configured \texttt{AdaBoostClassifier} model's strategy.
+The model's strategy achieved a return multiple of 4.376.This surpasses the 3.633 return from the "buy and hold" benchmark, resulting in a net outperformance of 0.743, or 74.3\%.
+The observed outperformance corresponds to the final date of the dataset, which is the end of the backtesting period.
+This date can be configured in the configuration file as shown in lst. \ref{lst:pipeline_conf}.
 Moreover, the analysis took into account Binance's trading fees of 0.1\% for spot trading, ensuring a more realistic representation of potential real-world returns.
-The backtesting results show the potential of the model for real-world trading scenarios.
+The backtesting results show the potential of the model to make profits for real-world trading scenarios.
 
 
 %trim=left bottom right top,
 \section{ML Pipeline Architecture}
 
-The architecture of the pipeline is visually depicted in a UML diagram, as shown in fig. ~\ref{fig:ml_backtester}.
-The main part of this diagram is the \texttt{MlBacktester} class. This class works as the main controller, managing different tasks and using other classes for specific jobs that represent the ML Pipeline~\ref{./pdf/ml_pipeline.pdf}, as described in the previous section~\ref{sec:ml_pipeline}.
+The architecture of the pipeline is visually depicted in a UML diagram, as shown in fig.~\ref{fig:ml_backtester}.
+The main part of this diagram is the \texttt{MlBacktester} class.
+This class works as the main controller, managing different tasks and using other classes for specific jobs that represent the ML Pipeline~\ref{fig:ml_pipeline}, as described in the previous section~\ref{sec:ml_pipeline}.
 
 The configuration of the model, its parameters, and the dataset is managed by the \texttt{BacktesterConfig} class.
 Data preprocessing, feature engineering, transformation, and selection are handled by the \texttt{MlDataManager} and \texttt{MlFeatureEngineer} classes.
@@ -330,12 +340,12 @@ For optimization purposes, \texttt{MlOptimizer} fine-tunes the model based on th
 This class collaborates with \texttt{MlModelFactory} to instantiate models leveraging the \texttt{sklearn} library.
 
 Visualization related to model training and dataset analysis is done by the \texttt{MlDataPlotter} class.
-The \texttt{Performance} class computes the performance of both the machine learning-based strategy and its corresponding benchmark. The same class was utilized for Technical Indicator-based Backtesting from previous chapter~\ref{chap:technical_backtesting}),
-
+The \texttt{Performance} class computes the performance of both the machine learning-based strategy and its corresponding benchmark.
+The same class was utilized for Technical Indicator-based Backtesting from the previous chapter~\ref{chap:technical_backtesting}.
 \begin{figure}[H]
 \centering
 \includegraphics[page=1, trim=30mm 100mm 30mm 30mm, width=1\textwidth, clip]{./pdf/ml_backtester.pdf}
-\caption{Architecture of the Automated Bot for Trading on the Binance Platform.}
+\caption{Architecture diagram of technical ML-based backtesting component of the framework.}
 \label{fig:ml_backtester}
 \end{figure}
 
@@ -348,11 +358,10 @@ Feature importance gives a clear measure to understand how much each feature mat
 Tree-based models like the  \texttt{AdaBoostClassifier}, referenced in fig. \ref{fig:backtest_res} and commonly found in the scikit-learn library, have an attribute called  \texttt{feature\_importances\_}`.
 This attribute derives its importance from the structure of trees and is inherent to models such as  \texttt{Decision Trees},  \texttt{Random Forests},  \texttt{Extra Trees},  \texttt{Gradient Boosted Trees}, and  \texttt{AdaBoost} when the base estimator is a \textbf{decision tree}.
 
-In the context of our analysis, the variable importance displayed in Figure \ref{fig:feature_importance} highlights which features play a major role in predictions.
-Features like STOCK\_10, STOROC\_10, and RSI\_10 emerge as some of the most influential, with a few others, including STOD\_10 and Stoch\_RSI\_10, also having considerable importance.
-The emphasis on these momentum indicators, particularly those over recent periods, underscores their relevance in predicting the target variable.
-Such prominence of these features reinforces the effectiveness of the model's predictions, indicating that introducing these features has positively impacted the model's performance.
-
+The analysis in fig.~\ref{fig:feature_importance} shows which features have the most impact on predictions.
+Features like \texttt{STOCK\_10}, \texttt{STOROC\_10}, and \texttt{RSI\_10} are among the most important.
+Other features, such as \texttt{STOD\_10} and \texttt{Stoch\_RSI\_10}, are also considerably important.
+These features, based on momentum indicators and primarily derived from recent periods, play a crucial role in predicting the outcome. Consequently, their inclusion has enhanced the model's predictions.
 \begin{figure}[h]
 \centering
 \begin{adjustbox}{max width=1.2\textwidth,center}
@@ -371,10 +380,15 @@ Such prominence of these features reinforces the effectiveness of the model's pr
 \label{fig:explained_variance}
 \end{figure}
 
-In trading too many features might sometimes weaken the model's performance, since many of these features can be redundant or just add noise.
-Furthermore, recalculating all these features every time the new market data arives can be time-consuming, which can slow down the model.
-To address this, dimensionality reduction techniques are employed. Through these methods, the number of features is reduced while preserving most of the important information. This makes model training faster and helps avoid problems like overfitting, where a model might perform well on training data but not on new, unseen data.
-The implemented ML Pipeline supports the dimensionality reduction. The implemented ML Pipeline supports dimensionality reduction, providing the method \texttt{perform\_svd} of \texttt{MlDataManager} that utilizes the \texttt{TruncatedSVD} functionality/module from the \texttt{sklearn} library,
-reducing the features through Principal Component Analysis (PCA) based on Singular Value Decomposition (SVD). The \texttt{plot\_explained\_variance} method of the \texttt{MlPlotter} class visualizes the reduced features and their aggregated variance,
-as depicted in fig.  \ref{fig:explained_variance}. This figure shows that just 10 components capture over 95\% of the important information in our dataset. This indicates that feature reduction can be very effective while still keeping most of the valuable data insights.
+In trading too many features in dataset might sometimes weaken the model's performance, since many of these features can be redundant or just add noise.
+Furthermore, recalculating all these features every time the new market data arrives can be time-consuming, which can slow down the model.
+To address this, dimensionality reduction techniques are employed.
+Through these methods, the number of features is reduced while preserving most of the important information.
+This makes model training faster and helps avoid problems like overfitting, where a model might perform well on training data but not on new, unseen data.
+The implemented ML Pipeline supports dimensionality reduction, providing the method \texttt{perform\_svd} of \texttt{MlDataManager} that utilizes the \texttt{TruncatedSVD} module from the \texttt{sklearn} library,
+reducing the features through Principal Component Analysis (PCA) based on Singular Value Decomposition (SVD).
+The method \texttt{plot\_explained\_variance} of the \texttt{MlPlotter} class visualizes the reduced features and their aggregated variance,
+as depicted in fig.  \ref{fig:explained_variance}.
+This figure shows that just 10 components capture over 95\% of the important information in our dataset.
+This indicates that feature reduction can be very effective while still keeping most of the valuable data insights.
 
