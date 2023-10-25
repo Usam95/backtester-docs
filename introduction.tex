@@ -1,16 +1,23 @@
 \chapter{Introduction}
 
 \section{Motivation}
-Trading involves buying and selling assets like stocks and cryptocurrencies to make a profit. With technology's evolution, trading has also advanced, using computers to make trades based on algorithms that analyze market data. These algorithms identify optimal buy or sell moments, benefiting from market trends or inefficiencies. A major advantage of this method is its precision, as computers can process vast data quickly and make consistent, emotion-free decisions. Integrating this with cloud technology enables a 24/7 trading system that can autonomously execute trades in various markets without human intervention.
+Trading involves buying and selling assets like stocks and cryptocurrencies to make a profit.
+With technology's evolution, trading has also advanced, using computers to make trades based on algorithms that analyze market data.
+These algorithms identify optimal buy or sell moments, benefiting from market trends or inefficiencies.
+A major advantage of this method is its precision, as computers can process vast data quickly and make consistent, emotion-free decisions.
+Integrating this with cloud technology enables a 24/7 trading system that can autonomously execute trades in various markets without human intervention.
 
-Backtesting is the process of testing a trading strategy using historical data, allowing traders to evaluate and refine their strategies before they use them in real trading. Driven by my hypothesis, questioning if algo trading strategies can indeed be beneficial, I found myself investing a significant amount of my personal time diving into the topic of algorithmic trading. Armed with the knowledge I gained and leveraging my data science and software engineering expertise, I started on building this backtesting framework. Throughout this journey, I wrote more than 7,000 lines of code to create a modular and customizable framework designed for evaluating various trading strategies, covering both technical indicators and machine learning methods.
-
+Backtesting is the process of testing a trading strategy using historical data, allowing traders to evaluate and refine their strategies before they use them in real trading.
+Driven by my hypothesis, questioning if algorithmic trading can indeed be beneficial, I found myself investing a significant amount of my personal time diving into this topic.
+Armed with the knowledge I gained and leveraging my data science and software engineering expertise, I started on building this backtesting framework.
+Throughout this journey, I wrote more than 7,000 lines of code to create a modular and customizable framework designed for evaluating various trading strategies, covering both technical indicators and machine learning methods.
 While originally designed for cryptocurrency markets, the adaptability of the framework allows its application across various markets, including stocks, energy, and more.
 As long as the input data conforms to the Open, High, Low, Close, Volume (OHLCV) format, the backtesting framework can be utilized.
 
-This framework leverages the vectorized approach of Python, facilitating compact code, faster execution compared to conventional Python loops, and efficient handling of time series data. Such an approach is particularly advantageous in financial algorithm implementations, especially when it comes to vectorized backtesting.
-
-The next section provides a brief overview of the main features of the framework. Detailed explanations of these features are provided in the following chapters.
+This framework leverages the vectorized approach of Python, facilitating compact code, faster execution compared to conventional Python loops, and efficient handling of time series data.
+Such an approach is particularly advantageous in financial algorithm implementations, especially when it comes to vectorized backtesting.
+The next section provides a brief overview of the main features of the framework.
+Detailed explanations of these features are provided in the following chapters.
 
 
 \section{Key Highlights}
@@ -24,17 +31,17 @@ The next section provides a brief overview of the main features of the framework
     \item Bollinger Bands (BB)
     \item Stochastic Oscillator (SO)
 \end{itemize}
-Additionally, various classification machine learning models are supported, as detailed in the next Chapter \ref{chap:ml_backtester}.
+Additionally, various classification machine learning models are supported, as detailed in the next Chapter \ref{chap:ml_backtesting}.
 Furthermore, the system is designed with modularity in mind, ensuring easy extensibility.
 New strategies can be seamlessly integrated by simply adding new classes with the desired implementations, eliminating the need to modify previously implemented and validated code.
     \item \textbf{Data Source}: The data for this project is directly sourced from Binance using the \texttt{data\_retriever} module, primarily in 1-minute intervals.
 The data for this project is directly sourced from Binance using the \texttt{data\_retriever} module, primarily in 1-minute intervals.
 
-    \item \textbf{Optimization Support}: The strategies using based on technical indicators and machine learning models can be backtested and fine-tuned using different performance measures. Settings for optimization can be set in a special JSON configuration file (see lst. ~\ref{lst:ml_config}).
-Currently, the optimization supports GridSearch for both technical indicators and machine learning models, as well as Bayesian Optimization
+    \item \textbf{Optimization Support}: The strategies using based on technical indicators and machine learning models can be backtested and fine-tuned using different performance measures.
+Optimization settings can be specified in a dedicated JSON configuration file (see lst.~\ref{lst:backtest_config} for an example).Currently, the optimization supports GridSearch for both technical indicators and machine learning models, as well as Bayesian Optimization
 for technical indicators.
 
-    \item \textbf{Configuration Support}: As mentioned earlier, both technical indicators and machine learning models can be configured for optimization using JSON configuration files. These files also allow to easily set up deployment settings, including choosing algorithms, deciding which symbols to trade, and setting other parameters.
+    \item \textbf{Configuration Support}: As mentioned earlier, both technical indicators and machine learning models can be configured for optimization using JSON configuration files.These files also allow to easily set up deployment settings, including choosing algorithms, deciding which symbols to trade, and setting other parameters.
 
     \item \textbf{Deployment Simplified}: After backtesting, the optimized amd backtested strategies can be used for actual trading.
 The deployment infrastructure is designed to be adaptable and can be extended to support brokers with API capabilities for algorithmic trading.

@@ -1,9 +1,9 @@
-\chapter{Machine Learning based Backtesting}\label{chap:ml_bactesting}
+\chapter{Machine Learning based Backtesting}\label{chap:ml_backtesting}
 
 In the world of machine learning (ML), classification is about sorting things into categories.
 When applied to trading, ML Models predict whether the price will go up or down based on today's as well as historical data.
 Using ML for algorithmic trading requires a systematic approach.
-This structured process is visualized as a pipeline, detailed in fig. \ref{fig:ml_pipeline}.
+This structured process is visualized as a pipeline, detailed in fig.~\ref{fig:ml_pipeline}.
 
 %trim=left bottom right top,
 \section{ML Trading Pipeline} \label{sec:ml_pipeline}
@@ -45,7 +45,6 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
        "target": "Exceed_Avg_Returns"
     }
   },
-  "model_name": "RandomForestClassifier",
   "model_type": "classification",
   "models_config": [
      {
@@ -60,8 +59,6 @@ Also the \texttt{target\_conf} element allows for the selection of the target fo
 }
 \end{lstlisting}
 \end{minipage}
-
-
 
 \subsection{Data Ingestion and Preprocessing}
 The first step involves ingesting the data required for backtesting.
@@ -147,6 +144,8 @@ This ensures consistency in model predictions.
 
 The entire transformation workflow, from data loading, preprocessing, to feature-related operations, is managed by the \texttt{DataManager} and \texttt{FeatureEngineer} classes (see fig.~\ref{fig:ml_backtester}).
 
+\newpage
+
 \subsection{Data Visualization}
 For data analysis the \texttt{ml\_model\_evaluator} module was implemented with appropriate methods (see fig.~\ref{fig:ml_backtester}).
 It provides tools for both data and model checks.
@@ -165,11 +164,16 @@ Such a balanced distribution is crucial for training machine learning models eff
 \label{fig:signal_distribution}
 \end{figure}
 
+
 The fig.~\ref{fig:corr_coef} illustrates the \textbf{correlation coefficients} between various feature variables in the dataset.
 Each cell in the matrix represents the degree of correlation between two features: a value close to 1, represented by dark green, signifies a strong positive correlation, while a value close to -1, shown in white, indicates a strong negative correlation.
 
+The \textbf{histogram} fig.~\ref{fig:dataset_histogram} presents the distribution of engineered features derived from the BTCUSDT historical data.
+Each bar in the histogram represents the frequency of occurrences for a particular value or range of values.
+This visualization provides insights into the distribution patterns and potential skewness of the different features in the dataset.
 %trim=left bottom right top,
-\begin{figure}[h]
+
+\begin{figure}[H]
 \centering
 \begin{adjustbox}{max width=1.2\textwidth,center}
     \includegraphics[scale=1.2, trim={30mm 70mm 50mm 110mm}, clip]{./pdf/correlation_matrix.pdf}
@@ -178,22 +182,12 @@ Each cell in the matrix represents the degree of correlation between two feature
 \label{fig:corr_coef}
 \end{figure}
 
-The \textbf{histogram} fig.~\ref{fig:dataset_histogram} presents the distribution of engineered features derived from the BTCUSDT historical data.
-Each bar in the histogram represents the frequency of occurrences for a particular value or range of values.
-This visualization provides insights into the distribution patterns and potential skewness of the different features in the dataset.
-
-
 \subsection{Model Training and Optimization}
 The logic for model training and backtesting is encapsulated within the \texttt{ml\_backtester.py} module,
 while the \texttt{ml\_optimizer.py} module is dedicated to optimization purposes, as depicted in fig.~\ref{fig:ml_backtester}.
 The \texttt{\_optimize\_model} function in the \texttt{ml\_backtester.py} module is responsible for the model optimization process.
 It utilizes the instance of the  \texttt{MlOptimizer} class to perform searching for the best parameters of the model using techniques such as Grid Search with Cross-Validation.
 In a grid search, a grid of all possible hyperparameter combinations is created, and the model is trained using each one of them.
-The best model is then used in the \texttt{\_generate\_predictions} function to predict price movements trends on unseen data.
-Once optimized, the trained model specific to a cryptocurrency can be saved for subsequent use and reloaded as needed.
-As previously mentioned, all model details including the model type (for instance, AdaBoostClassifier) and its hyperparameter ranges can be configured in the appropriate config file (see lst. \ref{lst:pipeline_conf}).
-
-
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[style=pythonstyle, language=Python, caption={Functions of MlBacktester class for model optimization and predictions.},  captionpos=b, label=lst:add_features_function]
 def _optimize_model(self):
@@ -222,6 +216,9 @@ def _generate_predictions(self):
 \end{lstlisting}
 \end{minipage}
 
+The best model is then used in the \texttt{\_generate\_predictions} function to predict price movements trends on unseen data.
+Once optimized, the trained model specific to a cryptocurrency can be saved for subsequent use and reloaded as needed.
+As previously mentioned, all model details including the model type (for instance, AdaBoostClassifier) and its hyperparameter ranges can be configured in the appropriate config file (see lst. \ref{lst:pipeline_conf}).
 
 \subsection{Model Evaluation using Classification Metrics}
 Once the trading model is trained, its performance can be assessed using various metrics.

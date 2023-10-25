@@ -68,10 +68,13 @@
 \usepackage{xcolor}
 \usepackage{caption}
 
-\usepackage{caption}
+\lstset{
+  abovecaptionskip=10pt,
+  belowcaptionskip=-6pt % Adjust this to your liking, negative values decrease the space
+}
 
-\captionsetup[lstlisting]{belowskip=10pt} % Adjust 12pt to your liking
-\captionsetup[lstlisting]{aboveskip=10pt} % Adjust 12pt to your liking
+%\captionsetup[lstlisting]{belowskip=6pt} % Adjust 12pt to your liking
+%\captionsetup[lstlisting]{aboveskip=6pt} % Adjust 12pt to your liking
 \captionsetup[figure]{aboveskip=10pt} % Adjust 12pt to your liking
 
 
@@ -217,7 +220,7 @@
 
 \input{data_retriever.tex}  % Historical Data
 
-\input{vectorized_backtesting.tex}  % Documentation (docs)
+%\input{vectorized_backtesting.tex}  % Documentation (docs)
 \input{conclusion.tex}
 
 %\input{miscellaneous.tex}  % Miscellaneous

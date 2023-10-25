@@ -1,2 +1,38 @@
-\chapter{Setup Installation}
-This chapter introduces the setup installation.
+\chapter{Setup Installation and Usage}
+
+\section{Installation}
+
+To set up the environment for backtesting and deploying trading strategies, follow the steps below:
+
+\subsection{Prerequisites:}
+
+Ensure that you have \href{https://www.anaconda.com/products/distribution}{Anaconda} or \href{https://docs.conda.io/en/latest/miniconda.html}{Miniconda} installed on your machine. If not, download and install the appropriate version for your operating system.
+
+\subsection{Steps:}
+
+\begin{enumerate}
+    \item \textbf{Navigate to the project directory:}
+    Open a terminal and navigate to the project directory where the \texttt{requirements.yaml} file is located. This file contains all the necessary package dependencies and configurations for the backtesting environment.
+
+    \item \textbf{Create the Conda environment:}
+    Run the following command to create the \texttt{trading} environment using the configurations specified in the \texttt{requirements.yaml} file:
+
+\begin{verbatim}
+conda env create -f requirements.yaml
+\end{verbatim}
+    This command will set up a Conda environment named \texttt{trading} with Python version 3.8 and all the required packages.
+
+    \item \textbf{Activate the environment:}
+
+    After the environment is successfully created, it can be activated with the following command:
+
+\begin{verbatim}
+conda activate trading
+\end{verbatim}
+
+\end{enumerate}
+
+\section{Usage}
+
+\# TODO
+

@@ -20,8 +20,8 @@ def generate_pdf():
     clean()  # Cleaning before generating the PDF
     subprocess.run(["pdflatex", PROJECT])
     subprocess.run([BIBTOOL, PROJECT])
-    #subprocess.run(["pdflatex", PROJECT])
     subprocess.run(["pdflatex", PROJECT])
+    #subprocess.run(["pdflatex", PROJECT])
 
 
 def generate_docx():
